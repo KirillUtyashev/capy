@@ -15,7 +15,6 @@ def show_quiz(surface, clock, font, question):
     incorrect_answers = question["incorrect"]
     answers = incorrect_answers
     answers.append(question["correct"])
-    correct_answer = question["correct"]
 
     quiz_width, quiz_height = 400, 300
     quiz_x = (WIDTH - quiz_width) // 2
@@ -37,7 +36,6 @@ def show_quiz(surface, clock, font, question):
         buttons.append((ans, rect))
 
     quiz_running = True
-    user_answer_correct = False
 
     while quiz_running:
         clock.tick(FPS)
@@ -49,9 +47,7 @@ def show_quiz(surface, clock, font, question):
                 mouse_pos = pygame.mouse.get_pos()
                 for ans, rect in buttons:
                     if rect.collidepoint(mouse_pos):
-                        user_answer_correct = (ans == correct_answer)
-                        quiz_running = False
-                        break
+                        return ans
 
         # Dim the background
         surface.fill(BLACK)
@@ -79,4 +75,6 @@ def show_quiz(surface, clock, font, question):
         pygame.display.get_surface().blit(scaled_surface, (0, 0))
         pygame.display.flip()
 
-    return user_answer_correct
+
+def show_explanation(explanation):
+    pass

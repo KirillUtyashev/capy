@@ -1,5 +1,6 @@
 import cohere
 import json
+from .queue import Queue
 
 # ==================== CONFIGURATION ====================
 API_KEY = "V1WlqVxN5PtUEXsNbA5LgOliHoS6SysKT9a8wiO3"  # Replace with your Cohere API Key
@@ -30,10 +31,12 @@ def generate_questions(topic, n=5):
         Correct: <correct>
         Incorrect: <incorrect_1>, <incorrect_2>, <incorrect_3>
         """
+    print(prompt)
     response = co.generate(model="command-r-plus", prompt=prompt, max_tokens=150 * n, temperature=0.7)
 
-    questions = []
+    questions = Queue()
     raw_questions = response.generations[0].text.strip().split("\n\n")
+    questions_list = []
 
     for raw_question in raw_questions:
         lines = raw_question.strip().split("\n")
@@ -42,18 +45,19 @@ def generate_questions(topic, n=5):
         question = lines[0].replace("Question: ", "").strip()
         correct_answer = lines[1].replace("Correct: ", "").strip()
         incorrect_answers = [ans.strip() for ans in lines[2].replace("Incorrect: ", "").split(",")]
-        questions.append({"question": question, "correct": correct_answer, "incorrect": incorrect_answers})
-
+        questions.enqueue({"question": question, "correct": correct_answer, "incorrect": incorrect_answers})
+        questions_list.append({"question": question, "correct": correct_answer, "incorrect": incorrect_answers})
     with open(QUESTIONS_FILE, "w") as f:
-        json.dump(questions, f)
+        json.dump(questions_list, f)
+    print(questions_list)
     return questions
 
 
-def load_questions():
-    return generate_questions("elementary math")
-
-questions = load_questions()
-current_index = 0
+# def load_questions():
+#     return generate_questions("elementary math")
+#
+# questions = load_questions()
+# current_index = 0
 
 
 def generate_similar_question(similar_to):
@@ -73,18 +77,18 @@ def generate_similar_question(similar_to):
     incorrect_answers = [ans.strip() for ans in lines[2].replace("Incorrect: ", "").split(",")]
     return {"question": question, "correct": correct_answer, "incorrect": incorrect_answers}
 
-#
-# def explain_mistake(question, correct_answer, user_answer):
-#     prompt = f"""
-#     A child answered a multiple-choice question incorrectly.
-#     Question: {question}
-#     User's incorrect answer: {user_answer}
-#     Correct answer: {correct_answer}
-#     Explanation: Explain in simple, easy-to-understand language why the correct answer is right and why the child’s answer was not correct. Avoid complex terms and provide a straightforward reasoning that a child can grasp.
-#     Encouragement: Include an encouraging note that reinforces that making mistakes is a normal part of learning and that trying is important.
-#     """
-#     response = co.generate(model="command-r-plus", prompt=prompt, max_tokens=100, temperature=0.7)
-#     return response.generations[0].text.strip()
+
+def explain_mistake(question, correct_answer, user_answer):
+    prompt = f"""
+    A child answered a multiple-choice question incorrectly.
+    Question: {question}
+    User's incorrect answer: {user_answer}
+    Correct answer: {correct_answer}
+    Explanation: Explain in simple, easy-to-understand language why the correct answer is right and why the child’s answer was not correct. Avoid complex terms and provide a straightforward reasoning that a child can grasp.
+    Encouragement: Include an encouraging note that reinforces that making mistakes is a normal part of learning and that trying is important.
+    """
+    response = co.generate(model="command-r-plus", prompt=prompt, max_tokens=100, temperature=0.7)
+    return response.generations[0].text.strip()
 #
 #
 # def show_question():

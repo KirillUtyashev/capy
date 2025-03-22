@@ -15,7 +15,7 @@ GRID_ORIGIN_X = 100  # left padding
 GRID_ORIGIN_Y = 100  # top padding
 
 MONSTER_SPEED = 1
-STUN_1_TIME = 120
+
 
 # File paths (relative to the project root)
 ASSETS_DIR = "assets"

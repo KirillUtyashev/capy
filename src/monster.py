@@ -32,7 +32,7 @@ class Monster:
         # (Optional) AI or idle movement
         pass
 
-    def move_towards_player(self, hero, all_monsters, stones, speed=1, safe_distance=100):
+    def move_towards_player(self, hero, all_monsters, stones, speed=1, safe_distance=200):
         """
         Moves the monster towards the hero while maintaining a safe distance from all other monsters.
         safe_distance: minimum gap (in pixels) required between monsters.

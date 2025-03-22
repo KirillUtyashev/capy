@@ -171,6 +171,45 @@ class Game:
     def get_font(self, size): # Returns Press-Start-2P in the desired size
         return pygame.font.Font("assets/font.ttf", size)
 
+    def choose_prompt(self):
+        background = pygame.image.load("assets/images/background.png")
+        topic = ""  # This will store the user's text input
+        input_active = True
+
+        while input_active:
+            self.screen.blit(background, (0, 0))
+
+            # Header Text
+            header_text = self.get_font(100).render("USER INPUT", True, "#b68f40")
+            header_rect = header_text.get_rect(center=(640, 100))
+            self.screen.blit(header_text, header_rect)
+
+            # Input Box
+            input_box_rect = pygame.Rect(320, 300, 640, 60)  # Adjust position/size as needed
+            pygame.draw.rect(self.screen, (255, 255, 255), input_box_rect, 2)
+
+            # Render the user input text with a small left padding
+            input_text_surf = self.get_font(50).render(topic, True, "#d7fcd4")
+            input_text_rect = input_text_surf.get_rect(midleft=(input_box_rect.x + 10, input_box_rect.centery))
+            self.screen.blit(input_text_surf, input_text_rect)
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    input_active = False
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        print("User Input:", topic)
+                        input_active = False  # or trigger another action/transition
+                    elif event.key == pygame.K_BACKSPACE:
+                        topic = topic[:-1]
+                    else:
+                        topic += event.unicode
+            pygame.display.update()
+        self.questions = generate_questions(topic, n=NUM_MONSTERS)
+        self.run()
+
     def main_menu(self):
         print("I'm init")
         background = pygame.image.load("assets/images/background.png")
