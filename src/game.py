@@ -133,8 +133,7 @@ class Game:
             # HUD
             health_text = self.font.render(f"Hero HP: {self.hero.health}", True, WHITE)
             self.base_surface.blit(health_text, (10, 10))
-            if self.cave and self.cave.active:
-                self.base_surface.blit(self.cave.image, self.cave.rect)
+
 
             if self.cave and self.cave.active and self.hero.rect.colliderect(self.cave.rect):
                 self.cave.interact(self.hero)
