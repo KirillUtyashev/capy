@@ -11,6 +11,7 @@ from .utils import reposition_hero, get_random_grid_position, get_random_spawn_p
 from .object import Cave, Stone
 import random
 from .settings import TILE_SIZE, GRID_WIDTH, GRID_HEIGHT, GRID_ORIGIN_X, GRID_ORIGIN_Y
+from .camera import Camera
 
 def draw_health_bar(surface, x, y, current_health, max_health, bar_width=100, bar_height=10, color=(0, 255, 0)):
     """
@@ -42,6 +43,7 @@ class Game:
         pygame.display.set_caption("Dungeon Crawler - Quiz Edition")
         self.dungeon_tile = pygame.image.load(f"{IMG_DIR}/dungeon_tile.png").convert()
         self.dungeon_tile = pygame.transform.scale(self.dungeon_tile, (64, 64))
+        self.camera = Camera(WIDTH, HEIGHT, WIDTH // 2, HEIGHT // 2)
 
         self.clock = pygame.time.Clock()
         self.font = pygame.font.SysFont(None, 30)
@@ -85,6 +87,7 @@ class Game:
         # === Update logic ===
             keys = pygame.key.get_pressed()
             self.hero.update(keys)
+            self.camera.update(self.hero)
 
             # Monster collisions => quiz
             self.check_collisions()
@@ -102,12 +105,24 @@ class Game:
             self.base_surface.fill(BLACK)
             self.draw_dungeon_floor()
 
-            self.hero.draw(self.base_surface)
+            # self.hero.draw(self.base_surface)
+            # for stone in self.stones:
+            #     self.base_surface.blit(stone.image, stone.rect)
+            # for m in self.monsters:
+            #     m.draw(self.base_surface)
+            # # self.draw_shadow()
+
+            self.base_surface.blit(self.hero.image,
+                                   self.camera.apply(self.hero))
             for stone in self.stones:
-                self.base_surface.blit(stone.image, stone.rect)
-            for m in self.monsters:
-                m.draw(self.base_surface)
-            # self.draw_shadow()
+                self.base_surface.blit(stone.image, self.camera.apply(stone))
+            for monster in self.monsters:
+                self.base_surface.blit(monster.image,
+                                       self.camera.apply(monster))
+            if self.cave and self.cave.active:
+                self.base_surface.blit(self.cave.image,
+                                       self.camera.apply(self.cave))
+
             self.draw_hud()
             # HUD
             health_text = self.font.render(f"Hero HP: {self.hero.health}", True, WHITE)
@@ -245,9 +260,13 @@ class Game:
         self.cave.spawn()
 
     def draw_dungeon_floor(self):
-        for x in range(100, 1001, 64):  # 100 to 1000 inclusive, step by TILE_SIZE
+        for x in range(100, 1001,
+                       64):  # 100 to 1000 inclusive, step by TILE_SIZE
             for y in range(100, 1001, 64):
-                self.base_surface.blit(self.dungeon_tile, (x, y))
+                # Apply camera offset to floor tile position
+                tile_pos = (
+                x - self.camera.camera_rect.x, y - self.camera.camera_rect.y)
+                self.base_surface.blit(self.dungeon_tile, tile_pos)
     # def draw_shadow(self):
     # # Create a full-screen black transparent surface
     #     self.shadow_surface = pygame.Surface((WIDTH, HEIGHT), flags=pygame.SRCALPHA)
