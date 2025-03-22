@@ -2,6 +2,8 @@
 import pygame
 from .settings import HERO_HEALTH, HERO_SPEED
 from .settings import IMG_DIR, TILE_SIZE, GRID_WIDTH, GRID_HEIGHT, GRID_ORIGIN_X, GRID_ORIGIN_Y
+from .utils import tint_image
+
 
 class Hero:
     def __init__(self, x, y):
@@ -11,8 +13,10 @@ class Hero:
         knight_attack_image = pygame.image.load(f"{IMG_DIR}/knight_attack.png")
         knight_attack_image = pygame.transform.scale(knight_attack_image,
                                               (64, 64))  # recizing
+
         self.attack_image = knight_attack_image
         self.normal_image = knight_image
+        self.knight_damaged_image = tint_image(self.normal_image, "RED")
         self.image = knight_image
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
@@ -23,6 +27,7 @@ class Hero:
         self.attack_timer = 0  # Counter for attack frame
         self.attack_flag = 0
         self.chill_timer = 0
+        self.damaged_timer = 0
         # Additional states (e.g., in_collision with monster)
 
     def move(self, dx, dy, stone_rects):
@@ -41,6 +46,8 @@ class Hero:
     def attack(self):
         self.attack_timer = 30
 
+    def take_damage(self):
+        self.damaged_timer = 20
 
     def update_position_from_rect(self):
         self.x = self.rect.x
@@ -68,8 +75,12 @@ class Hero:
                 self.image = self.attack_image
             else:
                 self.image = self.normal_image
+        elif self.damaged_timer > 0:
+            self.damaged_timer -= 1
+            self.image = self.knight_damaged_image
         else:
             self.image = self.normal_image
+
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)

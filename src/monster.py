@@ -2,19 +2,23 @@
 import math
 import hashlib
 import pygame
-from .settings import MONSTER_WIDTH, MONSTER_HEIGHT, MONSTER_HEALTH
+from .settings import MONSTER_WIDTH, MONSTER_HEIGHT, MONSTER_HEALTH, STUN_1_TIME
 from .settings import IMG_DIR
+from .utils import tint_image
 
 
 class Monster:
     def __init__(self, x, y):
         monster_image = pygame.image.load(f"{IMG_DIR}/monster.png").convert_alpha()
         monster_image = pygame.transform.scale(monster_image, (64, 64))#recizing
-        self.image = monster_image
+        self.normal_image = monster_image
+        self.image = self.normal_image
+        self.damaged_image = tint_image(self.normal_image, "RED")
         self.rect = pygame.Rect(x, y, MONSTER_WIDTH, MONSTER_HEIGHT)
         self.mask = pygame.mask.from_surface(self.image)
         self.health = MONSTER_HEALTH
         self.stun_timer = 0
+        self.damaged = False
 
 
         self.in_collision = False  # to track quiz collisions
@@ -35,6 +39,11 @@ class Monster:
         """
         if self.stun_timer > 0:
             self.stun_timer -= 1
+            if self.stun_timer > STUN_1_TIME // 2 and self.damaged:
+                self.image = self.damaged_image
+            else:
+                self.image = self.normal_image
+                self.damaged = False
             return
 
         # Calculate the vector from self to hero.

@@ -1,6 +1,7 @@
 # src/utils.py
 import math
 import random
+import pygame
 from .settings import TILE_SIZE, GRID_WIDTH, GRID_HEIGHT, WIDTH, HEIGHT
 def reposition_hero(hero, monster, distance=100):
     """
@@ -48,3 +49,9 @@ def get_random_spawn_positions(count, exclude=[]):
 def get_random_grid_position(exclude=[]):
     positions = [(x, y) for x in range(GRID_WIDTH) for y in range(GRID_HEIGHT) if (x, y) not in exclude]
     return random.choice(positions)
+
+def tint_image(image, tint_color):
+    """Return a tinted copy of the given image."""
+    tinted_image = image.copy()
+    tinted_image.fill(tint_color, special_flags=pygame.BLEND_RGB_ADD)
+    return tinted_image

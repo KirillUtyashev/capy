@@ -13,7 +13,8 @@ from .utils import reposition_hero, get_random_grid_position, get_random_spawn_p
 from .object import Cave, Stone, Button
 from .dungeon import Dungeon
 import random
-from .settings import TILE_SIZE, GRID_WIDTH, GRID_HEIGHT, GRID_ORIGIN_X, GRID_ORIGIN_Y, MONSTER_SPEED
+from .settings import (TILE_SIZE, GRID_WIDTH, GRID_HEIGHT, GRID_ORIGIN_X,
+                       GRID_ORIGIN_Y, MONSTER_SPEED, STUN_1_TIME)
 from .camera import Camera
 
 
@@ -221,11 +222,12 @@ class Game:
                         if result:
                             m.health -= 1
                             self.hero.attack()
-
+                            m.damaged = True
                         else:
                             self.hero.health -= 1
+                            self.hero.take_damage()
 
-                        m.stun_timer = 120
+                        m.stun_timer = STUN_1_TIME
                         # reposition_hero(self.hero, m, distance=100)
                 else:
                     m.in_collision = False
