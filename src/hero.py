@@ -1,6 +1,6 @@
 # src/hero.py
 import pygame
-from .settings import HERO_HEALTH, HERO_SPEED
+from .settings import HERO_HEALTH, HERO_SPEED, WIDTH, HEIGHT
 from .settings import IMG_DIR, TILE_SIZE, GRID_WIDTH, GRID_HEIGHT, GRID_ORIGIN_X, GRID_ORIGIN_Y
 
 class Hero:
@@ -18,19 +18,25 @@ class Hero:
 
         # Additional states (e.g., in_collision with monster)
 
-    def move(self, dx, dy):
+    def move(self, dx, dy, stone_rects):
+    # Try horizontal move
         new_x = self.rect.x + dx
+        self.rect.x = new_x
+        if any(self.rect.colliderect(stone) for stone in stone_rects):
+            self.rect.x -= dx  # Cancel move if hitting a stone
+
+        # Try vertical move
         new_y = self.rect.y + dy
+        self.rect.y = new_y
+        if any(self.rect.colliderect(stone) for stone in stone_rects):
+            self.rect.y -= dy  # Cancel move if hitting a stone
+
+    def update_position_from_rect(self):
+        self.x = self.rect.x
+        self.y = self.rect.y
 
 
-
-        if 100 <= new_x <= 1000:
-            self.rect.x = new_x
-        if 100 <= new_y <= 1000:
-            self.rect.y = new_y
-
-
-    def update(self, keys):
+    def update(self, keys, stone_rects):
         # Simple movement logic
         dx, dy = 0, 0
         if keys[pygame.K_LEFT]:
@@ -42,7 +48,8 @@ class Hero:
         if keys[pygame.K_DOWN]:
             dy = self.speed
 
-        self.move(dx, dy)
+        self.move(dx, dy, stone_rects)
+        # Check horizontal movement
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)

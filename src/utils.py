@@ -1,7 +1,7 @@
 # src/utils.py
 import math
 import random
-from .settings import TILE_SIZE, GRID_WIDTH, GRID_HEIGHT
+from .settings import TILE_SIZE, GRID_WIDTH, GRID_HEIGHT, WIDTH, HEIGHT
 def reposition_hero(hero, monster, distance=100):
     """
     Move 'hero' so its center is 'distance' pixels away
@@ -26,7 +26,7 @@ def reposition_hero(hero, monster, distance=100):
 
 
 
-def get_valid_spawn_positions(x_min=100, x_max=1000, y_min=100, y_max=1000):
+def get_valid_spawn_positions(x_min=100, x_max=int(0.8*WIDTH), y_min=100, y_max=int(0.8*HEIGHT)):
     """
     Returns a list of (x, y) positions inside the allowed area,
     aligned to the TILE_SIZE grid.

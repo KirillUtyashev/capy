@@ -9,8 +9,10 @@ from .monster import Monster
 from .quiz import show_quiz
 from .utils import reposition_hero, get_random_grid_position, get_random_spawn_positions, get_valid_spawn_positions
 from .object import Cave, Stone
+from .dungeon import Dungeon
 import random
 from .settings import TILE_SIZE, GRID_WIDTH, GRID_HEIGHT, GRID_ORIGIN_X, GRID_ORIGIN_Y
+from .camera import Camera
 
 def draw_health_bar(surface, x, y, current_health, max_health, bar_width=100, bar_height=10, color=(0, 255, 0)):
     """
@@ -37,12 +39,13 @@ def draw_health_bar(surface, x, y, current_health, max_health, bar_width=100, ba
 class Game:
     def __init__(self):
         pygame.init()
+        self.dungeon = Dungeon()
+        self.island_map = self.dungeon.get_island_only()
         self.base_surface = pygame.Surface((WIDTH, HEIGHT))  # Draw game here
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
         pygame.display.set_caption("Dungeon Crawler - Quiz Edition")
         self.dungeon_tile = pygame.image.load(f"{IMG_DIR}/dungeon_tile.png").convert()
         self.dungeon_tile = pygame.transform.scale(self.dungeon_tile, (64, 64))
-
         self.clock = pygame.time.Clock()
         self.font = pygame.font.SysFont(None, 30)
         self.exit_button_rect = pygame.Rect(WIDTH - 140, 10, 120, 50)
@@ -50,18 +53,22 @@ class Game:
         # self.shadow_surface = pygame.Surface((WIDTH, HEIGHT))
         # self.shadow_surface.set_colorkey((0, 0, 0))  # Make black fully transparent if needed
         # self.shadow_surface.set_alpha(220)  # Adjust darkness (0 = invisible, 255 = fully black)
-        self.stones = []
+        # Create hero, monsters
+        island_tiles = []
+        for row in range(len(self.island_map)):
+            for col in range(len(self.island_map[0])):
+                if self.island_map[row][col] == 1:
+                    x = 100 + col * TILE_SIZE
+                    y = 100 + row * TILE_SIZE
+                    island_tiles.append((x, y))
         self.spawn_border_stones()
         self.stone_positions = [stone.rect.topleft for stone in self.stones]
-        # Create hero, monsters
-        hero_pos = get_random_spawn_positions(1,exclude=self.stone_positions)[0]
-        self.hero = Hero(*hero_pos)
-        hero_tile = (self.hero.rect.x - GRID_ORIGIN_X) // TILE_SIZE, (self.hero.rect.y - GRID_ORIGIN_Y) // TILE_SIZE
-        monster_exclude = self.stone_positions + [hero_pos]
+        self.hero = Hero(164, 164)
+        self.camera = Camera(WIDTH, HEIGHT, self.hero.rect.centerx, self.hero.rect.centery)
+        monster_exclude = self.stone_positions
         monster_positions = get_random_spawn_positions(2, exclude=monster_exclude)
         self.monsters = [Monster(x, y) for (x, y) in monster_positions]
-        self.stones = []
-        self.spawn_border_stones()
+
 
     def run(self):
         running = True
@@ -84,7 +91,10 @@ class Game:
 
         # === Update logic ===
             keys = pygame.key.get_pressed()
-            self.hero.update(keys)
+            stone_rects = [stone.rect for stone in self.stones]
+            self.hero.update(keys, stone_rects)
+            self.camera.update(self.hero)
+            self.check_stone_collisions()
 
             # Monster collisions => quiz
             self.check_collisions()
@@ -102,12 +112,20 @@ class Game:
             self.base_surface.fill(BLACK)
             self.draw_dungeon_floor()
 
-            self.hero.draw(self.base_surface)
+            # self.hero.draw(self.base_surface)
+            # # self.draw_shadow()
+
+            self.base_surface.blit(self.hero.image,
+                                   self.camera.apply(self.hero))
             for stone in self.stones:
-                self.base_surface.blit(stone.image, stone.rect)
-            for m in self.monsters:
-                m.draw(self.base_surface)
-            # self.draw_shadow()
+                self.base_surface.blit(stone.image, self.camera.apply(stone))
+            for monster in self.monsters:
+                self.base_surface.blit(monster.image,
+                                       self.camera.apply(monster))
+            if self.cave and self.cave.active:
+                self.base_surface.blit(self.cave.image,
+                                       self.camera.apply(self.cave))
+
             self.draw_hud()
             # HUD
             health_text = self.font.render(f"Hero HP: {self.hero.health}", True, WHITE)
@@ -245,9 +263,17 @@ class Game:
         self.cave.spawn()
 
     def draw_dungeon_floor(self):
-        for x in range(100, 1001, 64):  # 100 to 1000 inclusive, step by TILE_SIZE
-            for y in range(100, 1001, 64):
-                self.base_surface.blit(self.dungeon_tile, (x, y))
+        for row in range(len(self.island_map)):
+            for col in range(len(self.island_map[0])):
+                if self.island_map[row][col] == 1:
+                    # Convert grid coords to screen coords
+                    x = 100 + col * TILE_SIZE
+                    y = 100 + row * TILE_SIZE
+
+                    tile_pos = (x - self.camera.camera_rect.x,
+                                y - self.camera.camera_rect.y)
+                    self.base_surface.blit(self.dungeon_tile, tile_pos)
+
     # def draw_shadow(self):
     # # Create a full-screen black transparent surface
     #     self.shadow_surface = pygame.Surface((WIDTH, HEIGHT), flags=pygame.SRCALPHA)
@@ -262,20 +288,64 @@ class Game:
     #     # Draw the shadow on top of everything
     #     self.screen.blit(self.shadow_surface, (0, 0))
     def spawn_border_stones(self):
-        x_min = 100
-        x_max = 1000
-        y_min = 100
-        y_max = 1000
+        self.stones = []
 
-        # Top and bottom rows (y = 100 and y = 1000)
-        for x in range(x_min, x_max + 1, TILE_SIZE):
-            self.stones.append(Stone(x, y_min))   # Top edge
-            self.stones.append(Stone(x, y_max))   # Bottom edge
+        rows = len(self.island_map)
+        cols = len(self.island_map[0])
 
-        # Left and right columns (x = 100 and x = 1000)
-        for y in range(y_min + TILE_SIZE, y_max, TILE_SIZE):  # skip corners (already placed)
-            self.stones.append(Stone(x_min, y))  # Left edge
-            self.stones.append(Stone(x_max, y))  # Right edge
+        for row in range(rows):
+            for col in range(cols):
+                if self.island_map[row][col] == 1:
+                    for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+                        nr, nc = row + dr, col + dc
+                        if not (0 <= nr < rows and 0 <= nc < cols) or self.island_map[nr][nc] == 0:
+                            # Edge of island
+                            x = 100 + col * TILE_SIZE
+                            y = 100 + row * TILE_SIZE
+                            self.stones.append(Stone(x, y))
+                            break  # only place one stone per tile
+
+
+    # def draw_dungeon_floor(self):
+    #     for row in range(len(self.island_map)):
+    #         for col in range(len(self.island_map[0])):
+    #             if self.island_map[row][col] == 1:
+    #                 # Convert grid coords to screen coords
+    #                 x = 100 + col * TILE_SIZE
+    #                 y = 100 + row * TILE_SIZE
+    #
+    #                 tile_pos = (x - self.camera.camera_rect.x,
+    #                             y - self.camera.camera_rect.y)
+    #                 self.base_surface.blit(self.dungeon_tile, tile_pos)
+
+    def check_stone_collisions(self):
+        for stone in self.stones:
+            if self.hero.rect.colliderect(stone.rect):
+                dx = self.hero.rect.centerx - stone.rect.centerx
+                dy = self.hero.rect.centery - stone.rect.centery
+
+                # Normalize direction
+                if dx == 0 and dy == 0:
+                    dx, dy = random.choice([(1,0), (-1,0), (0,1), (0,-1)])
+                else:
+                    length = max((dx**2 + dy**2)**0.5, 1)
+                    dx /= length
+                    dy /= length
+
+                # Knockback vector (100 pixels)
+                knockback_distance = 1
+                knockback_x = int(dx * knockback_distance)
+                knockback_y = int(dy * knockback_distance)
+
+                # Apply knockback
+                self.hero.rect.x += knockback_x
+                self.hero.rect.y += knockback_y
+
+                # Optional: snap back to grid
+                self.hero.update_position_from_rect()
+
+                break  # Only one collision per frame
+
 
 
 
