@@ -5,7 +5,7 @@ import sys
 import json
 
 # ==================== CONFIGURATION ====================
-API_KEY = "V1WlqVxN5PtUEXsNbA5LgOliHoS6SysKT9a8wiO3"  # Replace with your Cohere API Key
+API_KEY = "генерите ключ сами"  # Replace with your Cohere API Key
 TOPIC = "general trivia"
 QUESTIONS_FILE = "questions.json"
 
