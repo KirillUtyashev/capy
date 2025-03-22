@@ -12,8 +12,9 @@ class Monster:
         monster_image = pygame.transform.scale(monster_image, (64, 64))#recizing
         self.image = monster_image
         self.rect = pygame.Rect(x, y, MONSTER_WIDTH, MONSTER_HEIGHT)
-        self.health = MONSTER_HEALTH
         self.mask = pygame.mask.from_surface(self.image)
+        self.health = MONSTER_HEALTH
+
 
         self.in_collision = False  # to track quiz collisions
 
