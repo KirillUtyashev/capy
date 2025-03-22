@@ -207,6 +207,10 @@ class Game:
     def check_collisions(self):
         """If hero collides with monster and it’s a new collision, show quiz."""
         for m in self.monsters:
+            if m.stun_timer > 0:
+                continue
+            else:
+                m.in_collision = False
             if self.hero.rect.colliderect(m.rect):
                 # Now check pixel-perfect collision
                 offset = (m.rect.x - self.hero.rect.x, m.rect.y - self.hero.rect.y)
@@ -217,9 +221,12 @@ class Game:
                         if result:
                             m.health -= 1
                             self.hero.attack()
+
                         else:
                             self.hero.health -= 1
-                        reposition_hero(self.hero, m, distance=100)
+
+                        m.stun_timer = 120
+                        # reposition_hero(self.hero, m, distance=100)
                 else:
                     m.in_collision = False
             else:

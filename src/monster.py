@@ -14,6 +14,7 @@ class Monster:
         self.rect = pygame.Rect(x, y, MONSTER_WIDTH, MONSTER_HEIGHT)
         self.mask = pygame.mask.from_surface(self.image)
         self.health = MONSTER_HEALTH
+        self.stun_timer = 0
 
 
         self.in_collision = False  # to track quiz collisions
@@ -32,6 +33,10 @@ class Monster:
         Moves the monster towards the hero while maintaining a safe distance from all other monsters.
         safe_distance: minimum gap (in pixels) required between monsters.
         """
+        if self.stun_timer > 0:
+            self.stun_timer -= 1
+            return
+
         # Calculate the vector from self to hero.
         dx = hero.rect.x - self.rect.x
         dy = hero.rect.y - self.rect.y

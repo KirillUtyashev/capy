@@ -21,7 +21,8 @@ class Hero:
         self.health = HERO_HEALTH
         self.speed = HERO_SPEED
         self.attack_timer = 0  # Counter for attack frame
-
+        self.attack_flag = 0
+        self.chill_timer = 0
         # Additional states (e.g., in_collision with monster)
 
     def move(self, dx, dy, stone_rects):
@@ -38,7 +39,8 @@ class Hero:
             self.rect.y -= dy  # Cancel move if hitting a stone
 
     def attack(self):
-        self.attack_timer = 10
+        self.attack_timer = 30
+
 
     def update_position_from_rect(self):
         self.x = self.rect.x
@@ -62,7 +64,10 @@ class Hero:
 
         if self.attack_timer > 0:
             self.attack_timer -= 1
-            self.image = self.attack_image
+            if self.attack_timer < 10 or self.attack_timer > 20:
+                self.image = self.attack_image
+            else:
+                self.image = self.normal_image
         else:
             self.image = self.normal_image
 
