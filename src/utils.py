@@ -27,7 +27,7 @@ def reposition_hero(hero, monster, distance=100):
 
 
 
-def get_valid_spawn_positions(dungeon, tile_size=TILE_SIZE):
+def get_valid_spawn_positions(dungeon, tile_size=TILE_SIZE,offset_x=100, offset_y=100):
     """
     Returns a list of (x, y) positions for valid spawn locations inside the dungeon,
     aligned to the tile_size grid.
@@ -44,12 +44,12 @@ def get_valid_spawn_positions(dungeon, tile_size=TILE_SIZE):
     for row_idx, row in enumerate(grid):
         for col_idx, cell in enumerate(row):
             if cell == 1:  # valid spawn position (island cell)
-                x = col_idx * tile_size
-                y = row_idx * tile_size
+                x = col_idx * tile_size + offset_x
+                y = row_idx * tile_size + offset_y
                 positions.append((x, y))
     return positions
 
-def get_random_spawn_positions(dungeon, count, exclude=None, tile_size=TILE_SIZE):
+def get_random_spawn_positions(dungeon, count, exclude=None, tile_size=TILE_SIZE,offset_x=100, offset_y=100):
     """
     Returns `count` random spawn positions from valid locations inside the dungeon,
     excluding any positions provided in `exclude`.
@@ -65,7 +65,7 @@ def get_random_spawn_positions(dungeon, count, exclude=None, tile_size=TILE_SIZE
     """
     if exclude is None:
         exclude = []
-    positions = get_valid_spawn_positions(dungeon, tile_size)
+    positions = get_valid_spawn_positions(dungeon, tile_size, offset_x, offset_y)
     # Filter out positions that are in the exclude list
     positions = [pos for pos in positions if pos not in exclude]
     return random.sample(positions, count)

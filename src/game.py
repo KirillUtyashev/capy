@@ -72,7 +72,8 @@ class Game:
         self.hero = Hero(164, 164)
         self.camera = Camera(WIDTH, HEIGHT, self.world_width, self.world_height)
         monster_exclude = self.stone_positions
-        monster_positions = get_random_spawn_positions(self.dungeon ,2, exclude=monster_exclude)
+        monster_positions = get_random_spawn_positions(self.dungeon ,2, exclude=monster_exclude,offset_x=100,
+                                                       offset_y=100)
         self.monsters = [Monster(x, y) for (x, y) in monster_positions]
 
     def run(self):
@@ -317,7 +318,20 @@ class Game:
 
 
     def spawn_cave(self):
-        self.cave = Cave(300, 300)  # Set position as needed
+    # 1) Pick a random valid position for the cave
+    #    (i.e., on island cells, excluding stone positions, etc.)
+        cave_positions = get_random_spawn_positions(
+            self.dungeon,           # the Dungeon instance
+            count=1,                # just 1 random spot for the cave
+            exclude=self.stone_positions,  # optional; exclude stone positions
+            tile_size=TILE_SIZE,
+            offset_x=100,           # match whatever offset you're using
+            offset_y=100
+        )
+
+        # 2) Create the cave at that position
+        x, y = cave_positions[0]
+        self.cave = Cave(x, y)
         self.cave.spawn()
 
     def draw_dungeon_floor(self):
