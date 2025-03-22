@@ -169,6 +169,7 @@ class Game:
                         result = show_quiz(self.base_surface, self.clock, self.font)
                         if result:
                             m.health -= 1
+                            self.hero.attack()
                         else:
                             self.hero.health -= 1
                         reposition_hero(self.hero, m, distance=100)

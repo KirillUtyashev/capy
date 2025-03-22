@@ -8,6 +8,11 @@ class Hero:
         # Load knight image
         knight_image = pygame.image.load(f"{IMG_DIR}/knight.png").convert_alpha()
         knight_image = pygame.transform.scale(knight_image, (64, 64))#recizing
+        knight_attack_image = pygame.image.load(f"{IMG_DIR}/knight_attack.png")
+        knight_attack_image = pygame.transform.scale(knight_attack_image,
+                                              (64, 64))  # recizing
+        self.attack_image = knight_attack_image
+        self.normal_image = knight_image
         self.image = knight_image
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
@@ -15,6 +20,7 @@ class Hero:
         self.rect.y = y
         self.health = HERO_HEALTH
         self.speed = HERO_SPEED
+        self.attack_timer = 0  # Counter for attack frame
 
         # Additional states (e.g., in_collision with monster)
 
@@ -30,6 +36,9 @@ class Hero:
         self.rect.y = new_y
         if any(self.rect.colliderect(stone) for stone in stone_rects):
             self.rect.y -= dy  # Cancel move if hitting a stone
+
+    def attack(self):
+        self.attack_timer = 10
 
     def update_position_from_rect(self):
         self.x = self.rect.x
@@ -50,6 +59,12 @@ class Hero:
 
         self.move(dx, dy, stone_rects)
         # Check horizontal movement
+
+        if self.attack_timer > 0:
+            self.attack_timer -= 1
+            self.image = self.attack_image
+        else:
+            self.image = self.normal_image
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
