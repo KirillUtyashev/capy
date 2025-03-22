@@ -11,8 +11,9 @@ from .utils import reposition_hero, get_random_grid_position, get_random_spawn_p
 from .object import Cave, Stone
 from .dungeon import Dungeon
 import random
-from .settings import TILE_SIZE, GRID_WIDTH, GRID_HEIGHT, GRID_ORIGIN_X, GRID_ORIGIN_Y
+from .settings import TILE_SIZE, GRID_WIDTH, GRID_HEIGHT, GRID_ORIGIN_X, GRID_ORIGIN_Y, MONSTER_SPEED
 from .camera import Camera
+
 
 def draw_health_bar(surface, x, y, current_health, max_health, bar_width=100, bar_height=10, color=(0, 255, 0)):
     """
@@ -33,7 +34,6 @@ def draw_health_bar(surface, x, y, current_health, max_health, bar_width=100, ba
     # Draw the filled part
     inner_rect = pygame.Rect(x, y, fill_width, bar_height)
     pygame.draw.rect(surface, color, inner_rect)
-
 
 
 class Game:
@@ -71,7 +71,6 @@ class Game:
         monster_positions = get_random_spawn_positions(2, exclude=monster_exclude)
         self.monsters = [Monster(x, y) for (x, y) in monster_positions]
 
-
     def run(self):
         running = True
         while running:
@@ -89,7 +88,6 @@ class Game:
                     if self.exit_button_rect.collidepoint(mouse_pos):
                         # End the game
                         running = False
-
 
         # === Update logic ===
             keys = pygame.key.get_pressed()
@@ -122,13 +120,12 @@ class Game:
             for stone in self.stones:
                 self.base_surface.blit(stone.image, self.camera.apply(stone))
             for monster in self.monsters:
-                monster.move_towards_player(self.hero, self.monsters, speed=2)
-                self.base_surface.blit(monster.image,
-                                       self.camera.apply(monster))
+                monster.move_towards_player(hero=self.hero, all_monsters=self.monsters, speed=MONSTER_SPEED, stones=self.stones)
+                print(monster.rect.x, monster.rect.y)
+                self.base_surface.blit(monster.image, self.camera.apply(monster))
             if self.cave and self.cave.active:
                 self.base_surface.blit(self.cave.image,
                                        self.camera.apply(self.cave))
-
             self.draw_hud()
             # HUD
             health_text = self.font.render(f"Hero HP: {self.hero.health}", True, WHITE)
@@ -319,7 +316,6 @@ class Game:
     #                 tile_pos = (x - self.camera.camera_rect.x,
     #                             y - self.camera.camera_rect.y)
     #                 self.base_surface.blit(self.dungeon_tile, tile_pos)
-
     def check_stone_collisions(self):
         for stone in self.stones:
             if self.hero.rect.colliderect(stone.rect):
@@ -343,12 +339,6 @@ class Game:
                 self.hero.rect.x += knockback_x
                 self.hero.rect.y += knockback_y
 
-                # Optional: snap back to grid
                 self.hero.update_position_from_rect()
 
-                break  # Only one collision per frame
-
-
-
-
-
+                break

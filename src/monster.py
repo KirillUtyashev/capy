@@ -27,54 +27,55 @@ class Monster:
         # (Optional) AI or idle movement
         pass
 
-    def move_towards_player(self, hero, all_monsters, speed=1, safe_distance=100):
+    def move_towards_player(self, hero, all_monsters, stones, speed=1, safe_distance=100):
         """
         Moves the monster towards the hero while maintaining a safe distance from all other monsters.
         safe_distance: minimum gap (in pixels) required between monsters.
         """
         # Calculate the vector from self to hero.
+        print("I'm here")
         dx = hero.rect.x - self.rect.x
         dy = hero.rect.y - self.rect.y
         dist = math.hypot(dx, dy)
         if dist == 0:
-            return  # Prevent division by zero if they overlap.
+            return
 
-        # Normalize the vector and scale by the desired speed.
         dx, dy = (dx / dist) * speed, (dy / dist) * speed
 
-        # Create a candidate rectangle for the new position.
-        new_rect = self.rect.copy()
-        new_rect.x += dx
-        new_rect.y += dy
+        candidate_rect = self.rect.copy()
+        candidate_rect.x += dx
+        candidate_rect.y += dy
 
-        # Define a helper function to check collisions with a safety buffer.
-        def collides(rect):
+        def collides_with_monsters(rect):
             for monster in all_monsters:
                 if monster != self:
-                    # Inflate the other monster's rect by safe_distance*2 (30 pixels on each side).
-                    inflated_rect = monster.rect.inflate(safe_distance * 2, safe_distance * 2)
+                    inflated_rect = monster.rect.inflate(safe_distance, safe_distance)
                     if rect.colliderect(inflated_rect):
                         return True
             return False
 
-        # Check if the full move would result in a collision.
-        if not collides(new_rect):
+        def collides_with_stones(rect):
+            for stone in stones:
+                if rect.colliderect(stone.rect):
+                    return True
+            return False
+
+        # Check if the full move is clear of both monster and stone collisions.
+        if not collides_with_monsters(candidate_rect) and not collides_with_stones(candidate_rect):
             self.rect.x += dx
             self.rect.y += dy
         else:
-            # If a collision is detected, try to slide along each axis.
-            # Check horizontal movement only.
-            temp_rect = self.rect.copy()
-            temp_rect.x += dx
-            collision_x = collides(temp_rect)
+            # If the full move would collide, try sliding along each axis separately.
+            # Horizontal move only.
+            horizontal_rect = self.rect.copy()
+            horizontal_rect.x += dx
+            # Vertical move only.
+            vertical_rect = self.rect.copy()
+            vertical_rect.y += dy
 
-            # Check vertical movement only.
-            temp_rect = self.rect.copy()
-            temp_rect.y += dy
-            collision_y = collides(temp_rect)
-
-            # Move along any axis that is clear.
-            if not collision_x:
+            # Slide: if horizontal move is valid, update x.
+            if not collides_with_monsters(horizontal_rect) and not collides_with_stones(horizontal_rect):
                 self.rect.x += dx
-            if not collision_y:
+            # Slide: if vertical move is valid, update y.
+            if not collides_with_monsters(vertical_rect) and not collides_with_stones(vertical_rect):
                 self.rect.y += dy

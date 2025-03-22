@@ -28,6 +28,7 @@ class Cave(Object):
         else:
             print("The cave is not accessible yet.")
 
+
 class Stone(Object):
     def __init__(self, x, y):
         super().__init__("Stone")

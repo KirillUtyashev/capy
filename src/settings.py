@@ -14,6 +14,9 @@ GRID_HEIGHT = 10
 GRID_ORIGIN_X = 100  # left padding
 GRID_ORIGIN_Y = 100  # top padding
 
+MONSTER_SPEED = 1
+
+
 # File paths (relative to the project root)
 ASSETS_DIR = "assets"
 IMG_DIR = ASSETS_DIR + "/images"
