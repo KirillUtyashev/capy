@@ -3,7 +3,7 @@ import pygame
 
 
 class Camera:
-    def __init__(self, screen_width, screen_height, world_width=100000, world_height=100000, ):
+    def __init__(self, screen_width, screen_height, world_width=100000, world_height=100000):
         self.world_width = world_width
         self.world_height = world_height
         self.screen_width = screen_width
