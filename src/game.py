@@ -1,4 +1,6 @@
 # src/game.py
+import time
+
 import pygame
 import sys
 
@@ -8,7 +10,7 @@ from .hero import Hero
 from .monster import Monster
 from .quiz import show_quiz
 from .utils import reposition_hero, get_random_grid_position, get_random_spawn_positions, get_valid_spawn_positions
-from .object import Cave, Stone
+from .object import Cave, Stone, Button
 from .dungeon import Dungeon
 import random
 from .settings import TILE_SIZE, GRID_WIDTH, GRID_HEIGHT, GRID_ORIGIN_X, GRID_ORIGIN_Y, MONSTER_SPEED
@@ -72,6 +74,8 @@ class Game:
         self.monsters = [Monster(x, y) for (x, y) in monster_positions]
 
     def run(self):
+        self.base_surface.fill(BLACK)
+        self.draw_dungeon_floor()
         running = True
         while running:
             self.clock.tick(FPS)
@@ -82,7 +86,8 @@ class Game:
                     new_width, new_height = event.w, event.h
 
                 if event.type == pygame.QUIT:
-                    running = False
+                    pygame.quit()
+                    sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     mouse_pos = pygame.mouse.get_pos()
                     if self.exit_button_rect.collidepoint(mouse_pos):
@@ -131,7 +136,6 @@ class Game:
             health_text = self.font.render(f"Hero HP: {self.hero.health}", True, WHITE)
             self.base_surface.blit(health_text, (10, 10))
 
-
             if self.cave and self.cave.active and self.hero.rect.colliderect(self.cave.rect):
                 self.cave.interact(self.hero)
 
@@ -140,8 +144,9 @@ class Game:
             self.draw_scaled_game()
             pygame.display.flip()
 
-        pygame.quit()
-        sys.exit()
+        # pygame.quit()
+        self.main_menu()
+        # sys.exit()
 
     # def check_collisions(self):
     #     """If hero collides with monster and it’s a new collision, show quiz."""
@@ -157,6 +162,48 @@ class Game:
     #                 reposition_hero(self.hero, m, distance=100)
     #         else:
     #             m.in_collision = False
+
+    def get_font(self, size): # Returns Press-Start-2P in the desired size
+        return pygame.font.Font("assets/font.ttf", size)
+
+    def main_menu(self):
+        background = pygame.image.load("assets/images/background.png")
+        while True:
+            self.screen.blit(background, (0, 0))
+
+            MENU_MOUSE_POS = pygame.mouse.get_pos()
+
+            MENU_TEXT = self.get_font(100).render("MAIN MENU", True, "#b68f40")
+            MENU_RECT = MENU_TEXT.get_rect(center=(640, 100))
+
+            PLAY_BUTTON = Button(image=pygame.image.load("assets/images/text.png"), pos=(640, 250),
+                                 text_input="PLAY", font=self.get_font(75), base_color="#d7fcd4", hovering_color="White")
+            OPTIONS_BUTTON = Button(image=pygame.image.load("assets/images/text.png"), pos=(640, 400),
+                                    text_input="OPTIONS", font=self.get_font(75), base_color="#d7fcd4", hovering_color="White")
+            QUIT_BUTTON = Button(image=pygame.image.load("assets/images/text.png"), pos=(640, 550),
+                                 text_input="QUIT", font=self.get_font(75), base_color="#d7fcd4", hovering_color="White")
+
+            self.screen.blit(MENU_TEXT, MENU_RECT)
+
+            for button in [PLAY_BUTTON, OPTIONS_BUTTON, QUIT_BUTTON]:
+                button.changeColor(MENU_MOUSE_POS)
+                button.update(self.screen)
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS):
+                        self.run()
+                    if OPTIONS_BUTTON.checkForInput(MENU_MOUSE_POS):
+                        self.run()
+                    if QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):
+                        pygame.quit()
+                        sys.exit()
+
+            pygame.display.update()
+
     def check_collisions(self):
         """If hero collides with monster and it’s a new collision, show quiz."""
         for m in self.monsters:
@@ -257,6 +304,7 @@ class Game:
             # Label "Monster i" just above each bar
             label = self.font.render(f"Monster {i+1}", True, (255, 255, 255))
             self.base_surface.blit(label, (bar_x, bar_y - 18))\
+
 
     def spawn_cave(self):
         self.cave = Cave(300, 300)  # Set position as needed

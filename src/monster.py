@@ -33,7 +33,6 @@ class Monster:
         safe_distance: minimum gap (in pixels) required between monsters.
         """
         # Calculate the vector from self to hero.
-        print("I'm here")
         dx = hero.rect.x - self.rect.x
         dy = hero.rect.y - self.rect.y
         dist = math.hypot(dx, dy)
