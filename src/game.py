@@ -10,7 +10,7 @@ from .hero import Hero
 from .monster import Monster
 from .quiz import show_quiz
 from .utils import reposition_hero, get_random_grid_position, get_random_spawn_positions, get_valid_spawn_positions
-from .object import Cave, Stone, Button
+from .object import Cave, Stone, Button, Potion
 from .dungeon import Dungeon
 import random
 from .settings import (TILE_SIZE, GRID_WIDTH, GRID_HEIGHT, GRID_ORIGIN_X,
@@ -57,6 +57,7 @@ class Game:
         self.font = pygame.font.SysFont(None, 30)
         self.exit_button_rect = pygame.Rect(WIDTH - 140, 10, 120, 50)
         self.cave = None
+        self.potion=None
         # self.shadow_surface = pygame.Surface((WIDTH, HEIGHT))
         # self.shadow_surface.set_colorkey((0, 0, 0))  # Make black fully transparent if needed
         # self.shadow_surface.set_alpha(220)  # Adjust darkness (0 = invisible, 255 = fully black)
@@ -113,6 +114,8 @@ class Game:
             self.monsters = [m for m in self.monsters if m.health > 0]
             if not self.monsters and self.cave is None:
                 self.spawn_cave()
+            if len(self.monsters)==1 and self.potion is None:
+                self.spawn_potion()
             # If hero dead => exit or show game over
             if self.hero.health <= 0:
                 print("You died!")
@@ -132,6 +135,8 @@ class Game:
             for monster in self.monsters:
                 monster.move_towards_player(hero=self.hero, all_monsters=self.monsters, speed=MONSTER_SPEED, stones=self.stones)
                 self.base_surface.blit(monster.image, self.camera.apply(monster))
+            if self.potion and self.potion.active:
+                self.base_surface.blit(self.potion.image, self.camera.apply(self.potion))
             if self.cave and self.cave.active:
                 self.base_surface.blit(self.cave.image,
                                        self.camera.apply(self.cave))
@@ -142,6 +147,9 @@ class Game:
 
             if self.cave and self.cave.active and self.hero.rect.colliderect(self.cave.rect):
                 self.cave.interact(self.hero)
+            if self.potion and self.potion.active and self.hero.rect.colliderect(self.potion):
+                self.potion.interact(self.hero)
+                self.hero.health+=1
 
             # monster_text = self.font.render(f"Monsters: {len(self.monsters)}", True, WHITE)
             # self.screen.blit(monster_text, (10, 40))
@@ -376,6 +384,11 @@ class Game:
         x, y = cave_positions[0]
         self.cave = Cave(x, y)
         self.cave.spawn()
+
+    def spawn_potion(self):
+        pos=get_random_spawn_positions(1, exclude=self.stone_positions)
+        self.potion = Potion(pos[0][0],pos[0][1])
+        self.potion.spawn()
 
     def draw_dungeon_floor(self):
         for row in range(len(self.island_map)):

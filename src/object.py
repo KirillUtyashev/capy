@@ -35,6 +35,28 @@ class Cave(Object):
             pygame.quit()
 
 
+class Potion(Object):
+    def __init__(self, x, y):
+        super().__init__("Potion")
+        potion_image = pygame.image.load(f"{IMG_DIR}/potion.png").convert_alpha()
+        potion_image = pygame.transform.scale(potion_image, (108, 108))#recizing
+        self.image = potion_image # Assuming image is in assets directory
+        self.rect = self.image.get_rect(topleft=(x, y))
+        self.active = False
+
+    def spawn(self):
+        if not self.active:
+            print("A potion has appeared after all monsters have been defeated!")
+            self.active = True
+
+    def interact(self, hero):
+        if self.active:
+            print("potion...")
+            self.active = False
+        else:
+            print("The potion is not accessible yet.")
+
+
 class Stone(Object):
     def __init__(self, x, y):
         super().__init__("Stone")
