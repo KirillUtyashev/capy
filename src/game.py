@@ -37,7 +37,8 @@ def draw_health_bar(surface, x, y, current_health, max_health, bar_width=100, ba
 class Game:
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        self.base_surface = pygame.Surface((WIDTH, HEIGHT))  # Draw game here
+        self.screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
         pygame.display.set_caption("Dungeon Crawler - Quiz Edition")
         self.dungeon_tile = pygame.image.load(f"{IMG_DIR}/dungeon_tile.png").convert()
         self.dungeon_tile = pygame.transform.scale(self.dungeon_tile, (64, 64))
@@ -67,6 +68,11 @@ class Game:
         while running:
             self.clock.tick(FPS)
             for event in pygame.event.get():
+                if event.type == pygame.VIDEORESIZE:
+                    self.screen = pygame.display.set_mode((event.w, event.h),
+                                                     pygame.RESIZABLE)
+                    new_width, new_height = event.w, event.h
+
                 if event.type == pygame.QUIT:
                     running = False
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -76,7 +82,7 @@ class Game:
                         running = False
 
 
-            # === Update logic ===
+        # === Update logic ===
             keys = pygame.key.get_pressed()
             self.hero.update(keys)
 
@@ -93,27 +99,28 @@ class Game:
                 running = False
 
             # === Draw everything ===
-            self.screen.fill(BLACK)
+            self.base_surface.fill(BLACK)
             self.draw_dungeon_floor()
 
-            self.hero.draw(self.screen)
+            self.hero.draw(self.base_surface)
             for stone in self.stones:
-                self.screen.blit(stone.image, stone.rect)
+                self.base_surface.blit(stone.image, stone.rect)
             for m in self.monsters:
-                m.draw(self.screen)
+                m.draw(self.base_surface)
             # self.draw_shadow()
             self.draw_hud()
             # HUD
             health_text = self.font.render(f"Hero HP: {self.hero.health}", True, WHITE)
-            self.screen.blit(health_text, (10, 10))
+            self.base_surface.blit(health_text, (10, 10))
             if self.cave and self.cave.active:
-                self.screen.blit(self.cave.image, self.cave.rect)
+                self.base_surface.blit(self.cave.image, self.cave.rect)
 
             if self.cave and self.cave.active and self.hero.rect.colliderect(self.cave.rect):
                 self.cave.interact(self.hero)
 
             # monster_text = self.font.render(f"Monsters: {len(self.monsters)}", True, WHITE)
             # self.screen.blit(monster_text, (10, 40))
+            self.draw_scaled_game()
             pygame.display.flip()
 
         pygame.quit()
@@ -142,7 +149,7 @@ class Game:
                 if self.hero.mask.overlap(m.mask, offset):
                     if not m.in_collision:
                         m.in_collision = True
-                        result = show_quiz(self.screen, self.clock, self.font)
+                        result = show_quiz(self.base_surface, self.clock, self.font)
                         if result:
                             m.health -= 1
                         else:
@@ -153,7 +160,28 @@ class Game:
             else:
                 m.in_collision = False
 
+    def draw_scaled_game(self):
+        # Get the actual window size.
+        display_width, display_height = self.screen.get_size()
+        # Calculate scale factors based on your fixed game dimensions.
+        scale_w = display_width / WIDTH
+        scale_h = display_height / HEIGHT
+        # Use the smaller scale factor to preserve the aspect ratio.
+        scale = min(scale_w, scale_h)
+        scaled_width = int(WIDTH * scale)
+        scaled_height = int(HEIGHT * scale)
 
+        # Scale the base_surface (which is drawn in fixed dimensions).
+        scaled_surface = pygame.transform.scale(self.base_surface,
+                                                (scaled_width, scaled_height))
+
+        # Compute offsets to center the game view.
+        x_offset = (display_width - scaled_width) // 2
+        y_offset = (display_height - scaled_height) // 2
+
+        # Optionally clear the screen to a background color (BLACK in this case).
+        self.screen.fill(BLACK)
+        self.screen.blit(scaled_surface, (x_offset, y_offset))
 
 
     def draw_hud(self):
@@ -162,24 +190,24 @@ class Game:
         """
         # Hero health bar at (10, 10)
         # 2) Draw the exit button rectangle
-        pygame.draw.rect(self.screen, (150, 50, 50), self.exit_button_rect)
-        pygame.draw.rect(self.screen, (255, 255, 255), self.exit_button_rect, 2)
+        pygame.draw.rect(self.base_surface, (150, 50, 50), self.exit_button_rect)
+        pygame.draw.rect(self.base_surface, (255, 255, 255), self.exit_button_rect, 2)
 
         # "Exit" label
         exit_label = self.font.render("EXIT", True, (255, 255, 255))
         label_rect = exit_label.get_rect(center=self.exit_button_rect.center)
-        self.screen.blit(exit_label, label_rect)
+        self.base_surface.blit(exit_label, label_rect)
 
         draw_health_bar(
-            surface=self.screen,
-            x=10,
-            y=30,
-            current_health=self.hero.health,
-            max_health=10,  # or whatever your hero's max health is
-            bar_width=150,
-            bar_height=15,
-            color=(0, 255, 0)  # green for hero
-        )
+                    surface=self.base_surface,
+                    x=10,
+                    y=30,
+                    current_health=self.hero.health,
+                    max_health=10,  # or whatever your hero's max health is
+                    bar_width=150,
+                    bar_height=15,
+                    color=(0, 255, 0)  # green for hero
+                )
 
         # Label "Hero" above the bar
         # hero_label = self.font.render("Hero", True, (255, 255, 255))
@@ -193,12 +221,12 @@ class Game:
         spacing = 10
 
         for i, monster in enumerate(self.monsters):
-            # Calculate each monster bar’s x-position in a row
+    # Calculate each monster bar’s x-position in a row
             bar_x = bar_x_start + i * (bar_width + spacing)
 
             # Draw the monster bar horizontally
             draw_health_bar(
-                surface=self.screen,
+                surface=self.base_surface,
                 x=bar_x,
                 y=bar_y,
                 current_health=monster.health,
@@ -210,7 +238,8 @@ class Game:
 
             # Label "Monster i" just above each bar
             label = self.font.render(f"Monster {i+1}", True, (255, 255, 255))
-            self.screen.blit(label, (bar_x, bar_y - 18))
+            self.base_surface.blit(label, (bar_x, bar_y - 18))\
+
     def spawn_cave(self):
         self.cave = Cave(300, 300)  # Set position as needed
         self.cave.spawn()
@@ -218,7 +247,7 @@ class Game:
     def draw_dungeon_floor(self):
         for x in range(100, 1001, 64):  # 100 to 1000 inclusive, step by TILE_SIZE
             for y in range(100, 1001, 64):
-                self.screen.blit(self.dungeon_tile, (x, y))
+                self.base_surface.blit(self.dungeon_tile, (x, y))
     # def draw_shadow(self):
     # # Create a full-screen black transparent surface
     #     self.shadow_surface = pygame.Surface((WIDTH, HEIGHT), flags=pygame.SRCALPHA)
@@ -247,3 +276,7 @@ class Game:
         for y in range(y_min + TILE_SIZE, y_max, TILE_SIZE):  # skip corners (already placed)
             self.stones.append(Stone(x_min, y))  # Left edge
             self.stones.append(Stone(x_max, y))  # Right edge
+
+
+
+

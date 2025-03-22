@@ -1,8 +1,8 @@
 # src/settings.py
 
 # Window Settings
-WIDTH = 1600
-HEIGHT = 1600
+WIDTH = 1000
+HEIGHT = 1000
 FPS = 60
 TILE_SIZE = 64
 GRID_WIDTH = 10
