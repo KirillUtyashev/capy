@@ -10,7 +10,8 @@ from .quiz import show_quiz
 from .utils import reposition_hero, get_random_grid_position, get_random_spawn_positions, get_valid_spawn_positions
 from .object import Cave, Stone
 import random
-from .settings import TILE_SIZE, GRID_WIDTH, GRID_HEIGHT, GRID_ORIGIN_X, GRID_ORIGIN_Y
+from .settings import (TILE_SIZE, GRID_WIDTH, GRID_HEIGHT, GRID_ORIGIN_X,
+                       GRID_ORIGIN_Y, WORLD_WIDTH, WORLD_HEIGHT)
 from .camera import Camera
 
 def draw_health_bar(surface, x, y, current_health, max_health, bar_width=100, bar_height=10, color=(0, 255, 0)):
@@ -43,7 +44,7 @@ class Game:
         pygame.display.set_caption("Dungeon Crawler - Quiz Edition")
         self.dungeon_tile = pygame.image.load(f"{IMG_DIR}/dungeon_tile.png").convert()
         self.dungeon_tile = pygame.transform.scale(self.dungeon_tile, (64, 64))
-        self.camera = Camera(WIDTH, HEIGHT, WIDTH // 2, HEIGHT // 2)
+        self.camera = Camera(WIDTH, HEIGHT, WORLD_WIDTH, WORLD_HEIGHT)
 
         self.clock = pygame.time.Clock()
         self.font = pygame.font.SysFont(None, 30)
