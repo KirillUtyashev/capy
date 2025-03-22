@@ -10,9 +10,9 @@ class Hero:
         knight_image = pygame.transform.scale(knight_image, (64, 64))#recizing
         self.image = knight_image
         self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
         self.rect.x = x
         self.rect.y = y
-        self.mask = pygame.mask.from_surface(self.image)
         self.health = HERO_HEALTH
         self.speed = HERO_SPEED
 

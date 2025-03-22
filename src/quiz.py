@@ -72,6 +72,8 @@ def show_quiz(surface, clock, font):
             ans_rect = ans_surf.get_rect(center=rect.center)
             surface.blit(ans_surf, ans_rect)
 
+        scaled_surface = pygame.transform.scale(surface, (WIDTH, HEIGHT))
+        pygame.display.get_surface().blit(scaled_surface, (0, 0))
         pygame.display.flip()
 
     return user_answer_correct
