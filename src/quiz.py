@@ -4,22 +4,25 @@ import sys
 
 from .settings import WIDTH, HEIGHT, FPS, BLACK, WHITE
 
-def show_quiz(surface, clock, font):
+
+def show_quiz(surface, clock, font, question):
     """
     Displays a quiz with multiple choice answers on 'surface'.
     Returns True if the correct answer is chosen, otherwise False.
     Pauses the main loop until user clicks on an answer.
     """
-    question = "What is 2 + 2?"
-    answers = ["2", "3", "4", "5"]
-    correct_answer = "4"
+    question_ = question["question"]
+    incorrect_answers = question["incorrect"]
+    answers = incorrect_answers
+    answers.append(question["correct"])
+    correct_answer = question["correct"]
 
     quiz_width, quiz_height = 400, 300
     quiz_x = (WIDTH - quiz_width) // 2
     quiz_y = (HEIGHT - quiz_height) // 2
     quiz_rect = pygame.Rect(quiz_x, quiz_y, quiz_width, quiz_height)
 
-    question_surf = font.render(question, True, WHITE)
+    question_surf = font.render(question_, True, WHITE)
     question_rect = question_surf.get_rect(center=(quiz_rect.centerx, quiz_rect.top + 40))
 
     # Create 4 buttons in a 2x2 grid

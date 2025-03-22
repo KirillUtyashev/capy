@@ -3,7 +3,7 @@ import time
 
 import pygame
 import sys
-
+from .cohere_ai import generate_questions
 from .settings import WIDTH, HEIGHT, FPS, BLACK, WHITE
 from .settings import IMG_DIR
 from .hero import Hero
@@ -43,6 +43,7 @@ class Game:
     def __init__(self,in_cave=False):
         self.in_cave = in_cave
         pygame.init()
+        print("In the game")
         self.dungeon = Dungeon()
         self.island_map = self.dungeon.get_island_only()
         self.world_width = len(self.island_map[0]) * TILE_SIZE + 100  # width in pixels
@@ -75,6 +76,7 @@ class Game:
         monster_positions = get_random_spawn_positions(self.dungeon ,2, exclude=monster_exclude,offset_x=100,
                                                        offset_y=100)
         self.monsters = [Monster(x, y) for (x, y) in monster_positions]
+        self.questions = generate_questions("elementary math", n=3)
 
     def run(self):
         self.base_surface.fill(BLACK)
@@ -170,6 +172,7 @@ class Game:
         return pygame.font.Font("assets/font.ttf", size)
 
     def main_menu(self):
+        print("I'm init")
         background = pygame.image.load("assets/images/background.png")
         while True:
             self.screen.blit(background, (0, 0))
@@ -220,7 +223,9 @@ class Game:
                 if self.hero.mask.overlap(m.mask, offset):
                     if not m.in_collision:
                         m.in_collision = True
-                        result = show_quiz(self.base_surface, self.clock, self.font)
+                        question = random.choice(self.questions)
+                        result = show_quiz(self.base_surface, self.clock, self.font, question)
+                        self.questions.remove(question)
                         if result:
                             m.health -= 1
                             self.hero.attack()
