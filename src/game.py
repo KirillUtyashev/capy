@@ -12,6 +12,7 @@ from .quiz import show_quiz
 from .utils import reposition_hero, get_random_grid_position, get_random_spawn_positions, get_valid_spawn_positions
 from .object import Cave, Stone, Button, Potion
 from .dungeon import Dungeon
+from .assistant import Assistant
 import random
 from .settings import (TILE_SIZE, GRID_WIDTH, GRID_HEIGHT, GRID_ORIGIN_X,
                        GRID_ORIGIN_Y, MONSTER_SPEED, STUN_1_TIME, NUM_MONSTERS)
@@ -72,6 +73,7 @@ class Game:
         self.spawn_border_stones()
         self.stone_positions = [stone.rect.topleft for stone in self.stones]
         self.hero = Hero(164, 164)
+        self.assistant = Assistant(self.hero)
         self.camera = Camera(WIDTH, HEIGHT, self.world_width, self.world_height)
         monster_exclude = self.stone_positions
         monster_positions = get_random_spawn_positions(self.dungeon ,2, exclude=monster_exclude,offset_x=100,
@@ -104,6 +106,7 @@ class Game:
             keys = pygame.key.get_pressed()
             stone_rects = [stone.rect for stone in self.stones]
             self.hero.update(keys, stone_rects)
+            self.assistant.update()
             self.camera.update(self.hero)
             self.check_stone_collisions()
 
@@ -127,6 +130,7 @@ class Game:
 
             # self.hero.draw(self.base_surface)
             # # self.draw_shadow()
+            self.assistant.draw(self.base_surface, self.camera)
 
             self.base_surface.blit(self.hero.image,
                                    self.camera.apply(self.hero))
@@ -276,6 +280,7 @@ class Game:
                             m.health -= 1
                             self.hero.attack()
                             m.damaged = True
+                            self.assistant.speak()
                         else:
                             self.hero.health -= 1
                             self.hero.take_damage()
