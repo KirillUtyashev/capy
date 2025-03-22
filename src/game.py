@@ -122,6 +122,7 @@ class Game:
             for stone in self.stones:
                 self.base_surface.blit(stone.image, self.camera.apply(stone))
             for monster in self.monsters:
+                monster.move_towards_player(self.hero, self.monsters, speed=2)
                 self.base_surface.blit(monster.image,
                                        self.camera.apply(monster))
             if self.cave and self.cave.active:
