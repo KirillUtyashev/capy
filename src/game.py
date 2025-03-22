@@ -1,6 +1,4 @@
 # src/game.py
-import math
-
 import pygame
 import sys
 
@@ -13,7 +11,6 @@ from .utils import reposition_hero, get_random_grid_position, get_random_spawn_p
 from .object import Cave, Stone
 import random
 from .settings import TILE_SIZE, GRID_WIDTH, GRID_HEIGHT, GRID_ORIGIN_X, GRID_ORIGIN_Y
-
 
 def draw_health_bar(surface, x, y, current_health, max_health, bar_width=100, bar_height=10, color=(0, 255, 0)):
     """
@@ -36,6 +33,7 @@ def draw_health_bar(surface, x, y, current_health, max_health, bar_width=100, ba
     pygame.draw.rect(surface, color, inner_rect)
 
 
+
 class Game:
     def __init__(self):
         pygame.init()
@@ -56,7 +54,7 @@ class Game:
         self.spawn_border_stones()
         self.stone_positions = [stone.rect.topleft for stone in self.stones]
         # Create hero, monsters
-        hero_pos = get_random_spawn_positions(1, exclude=self.stone_positions)[0]
+        hero_pos = get_random_spawn_positions(1,exclude=self.stone_positions)[0]
         self.hero = Hero(*hero_pos)
         hero_tile = (self.hero.rect.x - GRID_ORIGIN_X) // TILE_SIZE, (self.hero.rect.y - GRID_ORIGIN_Y) // TILE_SIZE
         monster_exclude = self.stone_positions + [hero_pos]
@@ -68,7 +66,6 @@ class Game:
     def run(self):
         running = True
         while running:
-            print("hui")
             self.clock.tick(FPS)
             for event in pygame.event.get():
                 if event.type == pygame.VIDEORESIZE:
@@ -83,6 +80,7 @@ class Game:
                     if self.exit_button_rect.collidepoint(mouse_pos):
                         # End the game
                         running = False
+
 
         # === Update logic ===
             keys = pygame.key.get_pressed()
@@ -108,7 +106,6 @@ class Game:
             for stone in self.stones:
                 self.base_surface.blit(stone.image, stone.rect)
             for m in self.monsters:
-                m.move_towards_player(self.hero, self.monsters)
                 m.draw(self.base_surface)
             # self.draw_shadow()
             self.draw_hud()
@@ -243,7 +240,6 @@ class Game:
             label = self.font.render(f"Monster {i+1}", True, (255, 255, 255))
             self.base_surface.blit(label, (bar_x, bar_y - 18))\
 
-
     def spawn_cave(self):
         self.cave = Cave(300, 300)  # Set position as needed
         self.cave.spawn()
@@ -280,3 +276,7 @@ class Game:
         for y in range(y_min + TILE_SIZE, y_max, TILE_SIZE):  # skip corners (already placed)
             self.stones.append(Stone(x_min, y))  # Left edge
             self.stones.append(Stone(x_max, y))  # Right edge
+
+
+
+
