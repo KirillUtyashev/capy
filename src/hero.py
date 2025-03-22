@@ -46,4 +46,3 @@ class Hero:
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
-

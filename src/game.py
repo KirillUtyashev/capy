@@ -76,7 +76,7 @@ class Game:
                         running = False
 
 
-        # === Update logic ===
+            # === Update logic ===
             keys = pygame.key.get_pressed()
             self.hero.update(keys)
 
@@ -171,15 +171,15 @@ class Game:
         self.screen.blit(exit_label, label_rect)
 
         draw_health_bar(
-                    surface=self.screen,
-                    x=10,
-                    y=30,
-                    current_health=self.hero.health,
-                    max_health=10,  # or whatever your hero's max health is
-                    bar_width=150,
-                    bar_height=15,
-                    color=(0, 255, 0)  # green for hero
-                )
+            surface=self.screen,
+            x=10,
+            y=30,
+            current_health=self.hero.health,
+            max_health=10,  # or whatever your hero's max health is
+            bar_width=150,
+            bar_height=15,
+            color=(0, 255, 0)  # green for hero
+        )
 
         # Label "Hero" above the bar
         # hero_label = self.font.render("Hero", True, (255, 255, 255))
@@ -193,7 +193,7 @@ class Game:
         spacing = 10
 
         for i, monster in enumerate(self.monsters):
-    # Calculate each monster bar’s x-position in a row
+            # Calculate each monster bar’s x-position in a row
             bar_x = bar_x_start + i * (bar_width + spacing)
 
             # Draw the monster bar horizontally
@@ -210,8 +210,7 @@ class Game:
 
             # Label "Monster i" just above each bar
             label = self.font.render(f"Monster {i+1}", True, (255, 255, 255))
-            self.screen.blit(label, (bar_x, bar_y - 18))\
-
+            self.screen.blit(label, (bar_x, bar_y - 18))
     def spawn_cave(self):
         self.cave = Cave(300, 300)  # Set position as needed
         self.cave.spawn()
@@ -239,7 +238,7 @@ class Game:
         y_min = 100
         y_max = 1000
 
-    # Top and bottom rows (y = 100 and y = 1000)
+        # Top and bottom rows (y = 100 and y = 1000)
         for x in range(x_min, x_max + 1, TILE_SIZE):
             self.stones.append(Stone(x, y_min))   # Top edge
             self.stones.append(Stone(x, y_max))   # Bottom edge
@@ -248,7 +247,3 @@ class Game:
         for y in range(y_min + TILE_SIZE, y_max, TILE_SIZE):  # skip corners (already placed)
             self.stones.append(Stone(x_min, y))  # Left edge
             self.stones.append(Stone(x_max, y))  # Right edge
-
-
-
-
