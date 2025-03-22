@@ -23,11 +23,16 @@ class Cave(Object):
             print("A cave has appeared after all monsters have been defeated!")
             self.active = True
 
+
     def interact(self, hero):
         if self.active:
-            print(f"{hero.name} enters the cave...")
-        else:
-            print("The cave is not accessible yet.")
+            pygame.time.delay(300)  # Optional delay for clarity
+
+            from .game import Game  # avoid circular import issues
+            cave_game = Game(in_cave=True)  # pass flag
+            cave_game.run()
+
+            pygame.quit()
 
 
 class Stone(Object):

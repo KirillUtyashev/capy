@@ -9,7 +9,7 @@ class Hero:
     def __init__(self, x, y):
         # Load knight image
         knight_image = pygame.image.load(f"{IMG_DIR}/knight.png").convert_alpha()
-        knight_image = pygame.transform.scale(knight_image, (64, 64))#recizing
+        knight_image = pygame.transform.scale(knight_image, (52, 52))#recizing
         knight_attack_image = pygame.image.load(f"{IMG_DIR}/knight_attack.png")
         knight_attack_image = pygame.transform.scale(knight_attack_image,
                                               (64, 64))  # recizing

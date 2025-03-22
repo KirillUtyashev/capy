@@ -40,7 +40,8 @@ def draw_health_bar(surface, x, y, current_health, max_health, bar_width=100, ba
 
 
 class Game:
-    def __init__(self):
+    def __init__(self,in_cave=False):
+        self.in_cave = in_cave
         pygame.init()
         self.dungeon = Dungeon()
         self.island_map = self.dungeon.get_island_only()
@@ -71,7 +72,7 @@ class Game:
         self.hero = Hero(164, 164)
         self.camera = Camera(WIDTH, HEIGHT, self.world_width, self.world_height)
         monster_exclude = self.stone_positions
-        monster_positions = get_random_spawn_positions(2, exclude=monster_exclude)
+        monster_positions = get_random_spawn_positions(self.dungeon ,2, exclude=monster_exclude)
         self.monsters = [Monster(x, y) for (x, y) in monster_positions]
 
     def run(self):
