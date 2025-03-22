@@ -41,6 +41,8 @@ class Game:
         pygame.init()
         self.dungeon = Dungeon()
         self.island_map = self.dungeon.get_island_only()
+        self.world_width = len(self.island_map[0]) * TILE_SIZE + 100  # width in pixels
+        self.world_height = len(self.island_map) * TILE_SIZE + 100
         self.base_surface = pygame.Surface((WIDTH, HEIGHT))  # Draw game here
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
         pygame.display.set_caption("Dungeon Crawler - Quiz Edition")
@@ -64,7 +66,7 @@ class Game:
         self.spawn_border_stones()
         self.stone_positions = [stone.rect.topleft for stone in self.stones]
         self.hero = Hero(164, 164)
-        self.camera = Camera(WIDTH, HEIGHT, self.hero.rect.centerx, self.hero.rect.centery)
+        self.camera = Camera(WIDTH, HEIGHT, self.world_width, self.world_height)
         monster_exclude = self.stone_positions
         monster_positions = get_random_spawn_positions(2, exclude=monster_exclude)
         self.monsters = [Monster(x, y) for (x, y) in monster_positions]

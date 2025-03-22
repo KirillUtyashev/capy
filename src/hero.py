@@ -1,6 +1,6 @@
 # src/hero.py
 import pygame
-from .settings import HERO_HEALTH, HERO_SPEED, WIDTH, HEIGHT
+from .settings import HERO_HEALTH, HERO_SPEED
 from .settings import IMG_DIR, TILE_SIZE, GRID_WIDTH, GRID_HEIGHT, GRID_ORIGIN_X, GRID_ORIGIN_Y
 
 class Hero:
