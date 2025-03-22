@@ -14,7 +14,7 @@ from .object import Cave, Stone, Button
 from .dungeon import Dungeon
 import random
 from .settings import (TILE_SIZE, GRID_WIDTH, GRID_HEIGHT, GRID_ORIGIN_X,
-                       GRID_ORIGIN_Y, MONSTER_SPEED, STUN_1_TIME)
+                       GRID_ORIGIN_Y, MONSTER_SPEED, STUN_1_TIME, NUM_MONSTERS)
 from .camera import Camera
 
 
@@ -76,7 +76,7 @@ class Game:
         monster_positions = get_random_spawn_positions(self.dungeon ,2, exclude=monster_exclude,offset_x=100,
                                                        offset_y=100)
         self.monsters = [Monster(x, y) for (x, y) in monster_positions]
-        self.questions = generate_questions("elementary math", n=3)
+        self.questions = None
 
     def run(self):
         self.base_surface.fill(BLACK)
@@ -131,7 +131,6 @@ class Game:
                 self.base_surface.blit(stone.image, self.camera.apply(stone))
             for monster in self.monsters:
                 monster.move_towards_player(hero=self.hero, all_monsters=self.monsters, speed=MONSTER_SPEED, stones=self.stones)
-                print(monster.rect.x, monster.rect.y)
                 self.base_surface.blit(monster.image, self.camera.apply(monster))
             if self.cave and self.cave.active:
                 self.base_surface.blit(self.cave.image,
@@ -240,7 +239,7 @@ class Game:
                     sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS):
-                        self.run()
+                        self.choose_prompt()
                     if OPTIONS_BUTTON.checkForInput(MENU_MOUSE_POS):
                         self.run()
                     if QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):
@@ -262,10 +261,10 @@ class Game:
                 if self.hero.mask.overlap(m.mask, offset):
                     if not m.in_collision:
                         m.in_collision = True
-                        question = random.choice(self.questions)
-                        result = show_quiz(self.base_surface, self.clock, self.font, question)
-                        self.questions.remove(question)
-                        if result:
+                        # Gotta make sure queue is not empty
+                        question = self.questions.dequeue()
+                        ans = show_quiz(self.base_surface, self.clock, self.font, question)
+                        if ans == question["correct"]:
                             m.health -= 1
                             self.hero.attack()
                             m.damaged = True

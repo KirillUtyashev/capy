@@ -21,6 +21,8 @@ MONSTER_SPEED = 1
 ASSETS_DIR = "assets"
 IMG_DIR = ASSETS_DIR + "/images"
 SND_DIR = ASSETS_DIR + "/sounds"
+NUM_MONSTERS = 4
+STUN_1_TIME = 240
 
 # Colors
 WHITE = (255, 255, 255)
