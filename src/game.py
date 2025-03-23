@@ -285,6 +285,7 @@ class Game:
                             self.hero.health -= 1
                             self.hero.take_damage()
 
+
                         m.stun_timer = STUN_1_TIME
                         # reposition_hero(self.hero, m, distance=100)
                 else:
