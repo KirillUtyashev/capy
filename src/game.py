@@ -188,23 +188,32 @@ class Game:
 
     def choose_prompt(self):
         background = pygame.image.load("assets/images/background.png")
+        screen_width, screen_height = self.screen.get_size()  # Get screen dimensions
         topic = ""  # This will store the user's text input
         input_active = True
+
+        padding_top = 180  # Adjust this to move everything lower
 
         while input_active:
             self.screen.blit(background, (0, 0))
 
-            # Header Text
-            header_text = self.get_font(100).render("USER INPUT", True, "#b68f40")
-            header_rect = header_text.get_rect(center=(640, 100))
+            # Header Text - Centered with Padding
+            header_text = self.get_font(30).render("Please enter a topic to study...", True, "#000435")  # Softer gold color
+            header_rect = header_text.get_rect(center=(screen_width // 2, screen_height // 4 + padding_top))
             self.screen.blit(header_text, header_rect)
 
-            # Input Box
-            input_box_rect = pygame.Rect(320, 300, 640, 60)  # Adjust position/size as needed
+            # Input Box - Centered with Padding
+            input_box_width = 640
+            input_box_height = 60
+            padding_bottom=20
+            input_box_x = (screen_width - input_box_width) // 2
+            input_box_y = screen_height // 2 + padding_bottom
+
+            input_box_rect = pygame.Rect(input_box_x, input_box_y, input_box_width, input_box_height)
             pygame.draw.rect(self.screen, (255, 255, 255), input_box_rect, 2)
 
-            # Render the user input text with a small left padding
-            input_text_surf = self.get_font(50).render(topic, True, "#d7fcd4")
+            # Render User Input Text - Centered inside box
+            input_text_surf = self.get_font(50).render(topic, True, "#000435")
             input_text_rect = input_text_surf.get_rect(midleft=(input_box_rect.x + 10, input_box_rect.centery))
             self.screen.blit(input_text_surf, input_text_rect)
 
@@ -221,7 +230,9 @@ class Game:
                         topic = topic[:-1]
                     else:
                         topic += event.unicode
+
             pygame.display.update()
+
         self.initialize_theme(topic, generate_questions(topic, n=NUM_MONSTERS))
         self.run()
 
@@ -230,24 +241,29 @@ class Game:
         background = pygame.image.load("assets/images/background.png")
         screen_width, screen_height = self.screen.get_size()  # Get dynamic screen size
 
+        padding_top = 150  # Adjust this to move everything lower
+        button_offset = 100  # Additional spacing for buttons
+
         while True:
             self.screen.blit(background, (0, 0))
 
             MENU_MOUSE_POS = pygame.mouse.get_pos()
 
-            MENU_TEXT = self.get_font(100).render("MAIN MENU", True, "#b68f40")
-            MENU_RECT = MENU_TEXT.get_rect(center=(screen_width // 2, 100))
+            # Adjusted Header Position with New Color
+            MENU_TEXT = self.get_font(75).render("Educonquest", True, "#000435")  # Softer gold color
+            MENU_RECT = MENU_TEXT.get_rect(center=(screen_width // 2, 100 + padding_top))
 
             button_image = pygame.image.load("assets/images/text.png")
 
-            PLAY_BUTTON = Button(image=button_image, pos=(screen_width // 2, 250),
+            # Lowered Button Positions
+            PLAY_BUTTON = Button(image=button_image, pos=(screen_width // 2, 250 + padding_top + button_offset),
                                  text_input="PLAY", font=self.get_font(75), base_color="#d7fcd4",
                                  hovering_color="White")
-            OPTIONS_BUTTON = Button(image=button_image, pos=(screen_width // 2, 400),
+            OPTIONS_BUTTON = Button(image=button_image, pos=(screen_width // 2, 400 + padding_top + button_offset),
                                     text_input="OPTIONS", font=self.get_font(50), base_color="#d7fcd4",
                                     hovering_color="White")
-            QUIT_BUTTON = Button(image=button_image, pos=(screen_width // 2, 550),
-                                 text_input="QUIT", font=self.get_font(75), base_color="#d7fcd4",
+            QUIT_BUTTON = Button(image=button_image, pos=(screen_width // 2, 550 + padding_top + button_offset),
+                                 text_input="QUIT", font=self.get_font(60), base_color="#d7fcd4",
                                  hovering_color="White")
 
             self.screen.blit(MENU_TEXT, MENU_RECT)
