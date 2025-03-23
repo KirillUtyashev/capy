@@ -123,8 +123,8 @@ class Game:
         self.questions = self.run_generate_with_loading()
 
     def run(self):
-        self.base_surface.fill(BLACK)
-        self.draw_dungeon_floor()
+        background = pygame.image.load("assets/images/terrace.png")
+        self.screen.blit(background, (0, 0))
         running = True
         while running:
             self.clock.tick(FPS)
@@ -166,7 +166,8 @@ class Game:
                 running = False
 
             # === Draw everything ===
-            self.base_surface.fill(BLACK)
+            background = pygame.image.load("assets/images/terrace.png")
+            self.screen.blit(background, (0, 0))
             self.draw_dungeon_floor()
 
             # self.hero.draw(self.base_surface)
@@ -369,7 +370,8 @@ class Game:
         y_offset = (display_height - scaled_height) // 2
 
         # Optionally clear the screen to a background color (BLACK in this case).
-        self.screen.fill(BLACK)
+        background = pygame.image.load("assets/images/terrace.png")
+        self.screen.blit(background, (0, 0))
         self.screen.blit(scaled_surface, (x_offset, y_offset))
 
 
