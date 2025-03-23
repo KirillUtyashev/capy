@@ -59,9 +59,9 @@ class Potion(Object):
 
 
 class Stone(Object):
-    def __init__(self, x, y):
+    def __init__(self, x, y, theme):
         super().__init__("Stone")
-        stone_image = pygame.image.load(f"{IMG_DIR}/stone.png").convert_alpha()
+        stone_image = pygame.image.load(theme[3]).convert_alpha()
         stone_image = pygame.transform.scale(stone_image, (64, 64))#recizing
         self.image = stone_image # Assuming image is in assets directory
         self.rect = self.image.get_rect(topleft=(x, y))

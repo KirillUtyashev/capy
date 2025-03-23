@@ -57,6 +57,7 @@ def run_generate_question(topic, num, stop_event, result_queue):
 
 class Game:
     def __init__(self, in_cave=False):
+        self.theme=random.choice([["dungeon",f"{IMG_DIR}/dungeon_tile.png",f"{IMG_DIR}/monster.png", f"{IMG_DIR}/stone.png"], ["sea",f"{IMG_DIR}/bubbles.png",f"{IMG_DIR}/blue_mon.png", f"{IMG_DIR}/bubbl.png"], ["grass", f"{IMG_DIR}/grass.png", f"{IMG_DIR}/tree_mon.png", f"{IMG_DIR}/tre.png"]])
         self.in_cave = in_cave
         pygame.init()
         print("In the game")
@@ -67,7 +68,8 @@ class Game:
         self.base_surface = pygame.Surface((WIDTH, HEIGHT))  # Draw game here
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
         pygame.display.set_caption("Dungeon Crawler - Quiz Edition")
-        self.dungeon_tile = pygame.image.load(f"{IMG_DIR}/dungeon_tile.png").convert()
+        print(self.theme[1])
+        self.dungeon_tile = pygame.image.load(self.theme[1]).convert()
         self.dungeon_tile = pygame.transform.scale(self.dungeon_tile, (64, 64))
         self.clock = pygame.time.Clock()
         self.font = pygame.font.SysFont(None, 30)
@@ -93,7 +95,7 @@ class Game:
         monster_exclude = self.stone_positions
         monster_positions = get_random_spawn_positions(self.dungeon ,2, exclude=monster_exclude,offset_x=100,
                                                        offset_y=100)
-        self.monsters = [Monster(x, y) for (x, y) in monster_positions]
+        self.monsters = [Monster(x, y, self.theme) for (x, y) in monster_positions]
         if in_cave:
             self.questions = Queue()
             with open("src/questions.json", "r") as f:
@@ -479,7 +481,7 @@ class Game:
                             # Edge of island
                             x = 100 + col * TILE_SIZE
                             y = 100 + row * TILE_SIZE
-                            self.stones.append(Stone(x, y))
+                            self.stones.append(Stone(x, y, self.theme))
                             break  # only place one stone per tile
 
 

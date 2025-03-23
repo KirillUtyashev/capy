@@ -8,8 +8,8 @@ from .utils import tint_image
 
 
 class Monster:
-    def __init__(self, x, y):
-        monster_image = pygame.image.load(f"{IMG_DIR}/monster.png").convert_alpha()
+    def __init__(self, x, y, theme):
+        monster_image = pygame.image.load(theme[2]).convert_alpha()
         monster_image = pygame.transform.scale(monster_image, (64, 64))#recizing
         self.normal_image = monster_image
         self.image = self.normal_image
