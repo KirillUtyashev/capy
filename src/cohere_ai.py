@@ -1,15 +1,14 @@
 import cohere
 import json
-from .queue import Queue
 import os
+from .queue import Queue
 from dotenv import load_dotenv
 
 # ==================== CONFIGURATION ====================
-  # Replace with your Cohere API Key
 load_dotenv()
 API_KEY = os.getenv("API_KEY")
 TOPIC = "elementary math"
-QUESTIONS_FILE = "questions.json"
+QUESTIONS_FILE = "src/questions.json"
 
 # ==================== INITIALIZE COHERE ====================
 co = cohere.Client(API_KEY)
@@ -29,14 +28,16 @@ co = cohere.Client(API_KEY)
 # ==================== QUESTION GENERATION ====================
 def generate_questions(topic, n=5):
     prompt = f"""
-        Generate {n} different multiple-choice questions with 4 options about "{topic}".
+        You are helpful assistant for an application that integrates learning through interactive games.
+        Generate {n} different multiple-choice questions with 4 options about "{topic}". Be creative with your questions - explore various perspectives on the topic. 
         Format for each question:
         Question: <question>
         Correct: <correct>
         Incorrect: <incorrect_1>, <incorrect_2>, <incorrect_3>
+        Hint: <hint>
         """
     print(prompt)
-    response = co.generate(model="command-r-plus", prompt=prompt, max_tokens=50 * n, temperature=0.7)
+    response = co.generate(model="command-r-plus", prompt=prompt, max_tokens=100 * n, temperature=0.7)
 
     questions = Queue()
     raw_questions = response.generations[0].text.strip().split("\n\n")
@@ -44,13 +45,14 @@ def generate_questions(topic, n=5):
 
     for raw_question in raw_questions:
         lines = raw_question.strip().split("\n")
-        if len(lines) < 3:
+        if len(lines) < 4:
             continue
         question = lines[0].replace("Question: ", "").strip()
         correct_answer = lines[1].replace("Correct: ", "").strip()
         incorrect_answers = [ans.strip() for ans in lines[2].replace("Incorrect: ", "").split(",")]
-        questions.enqueue({"question": question, "correct": correct_answer, "incorrect": incorrect_answers})
-        questions_list.append({"question": question, "correct": correct_answer, "incorrect": incorrect_answers})
+        hint = lines[3].replace("Hint: ", "").strip()
+        questions.enqueue({"question": question, "correct": correct_answer, "incorrect": incorrect_answers, "hint": hint})
+        questions_list.append({"question": question, "correct": correct_answer, "incorrect": incorrect_answers, "hint": hint})
     with open(QUESTIONS_FILE, "w") as f:
         json.dump(questions_list, f)
     print(questions_list)

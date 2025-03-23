@@ -23,10 +23,9 @@ class Cave(Object):
             print("A cave has appeared after all monsters have been defeated!")
             self.active = True
 
-
     def interact(self, hero):
         if self.active:
-            pygame.time.delay(300)  # Optional delay for clarity
+            pygame.time.delay(100)  # Optional delay for clarity
 
             from .game import Game  # avoid circular import issues
             cave_game = Game(in_cave=True)  # pass flag

@@ -42,7 +42,7 @@ def draw_health_bar(surface, x, y, current_health, max_health, bar_width=100, ba
 
 
 class Game:
-    def __init__(self,in_cave=False):
+    def __init__(self, in_cave=False):
         self.in_cave = in_cave
         pygame.init()
         print("In the game")
@@ -59,7 +59,7 @@ class Game:
         self.font = pygame.font.SysFont(None, 30)
         self.exit_button_rect = pygame.Rect(WIDTH - 140, 10, 120, 50)
         self.cave = None
-        self.potion=None
+        self.potion= None
         # self.shadow_surface = pygame.Surface((WIDTH, HEIGHT))
         # self.shadow_surface.set_colorkey((0, 0, 0))  # Make black fully transparent if needed
         # self.shadow_surface.set_alpha(220)  # Adjust darkness (0 = invisible, 255 = fully black)
@@ -264,7 +264,7 @@ class Game:
             pygame.display.update()
 
     async def check_collisions(self):
-        """If hero collides with monster and it’s a new collision, show quiz."""
+        """If hero collides with monster, and it’s a new collision, show quiz."""
         temp_questions = Queue()
         for m in self.monsters:
             if m.stun_timer > 0:
@@ -279,9 +279,11 @@ class Game:
                         m.in_collision = True
                         # Gotta make sure queue is not empty
                         question = self.questions.dequeue()
-                        ans = show_quiz(self.base_surface, self.clock, self.font, question)
+                        print(len(self.questions), NUM_MONSTERS)
                         if len(self.questions) == NUM_MONSTERS // 2:
-                            temp_questions = await asyncio.to_thread(generate_questions, self.topic, 1)
+                            print("async")
+                            temp_questions = await asyncio.to_thread(generate_questions, self.topic, NUM_MONSTERS)
+                        ans = show_quiz(self.base_surface, self.clock, self.font, question)
                         if ans == question["correct"]:
                             m.health -= 1
                             self.hero.attack()
