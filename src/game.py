@@ -391,7 +391,7 @@ class Game:
         self.cave.spawn()
 
     def spawn_potion(self):
-        pos=get_random_spawn_positions(1, exclude=self.stone_positions)
+        pos=get_random_spawn_positions(self.dungeon, 1, exclude=self.stone_positions)
         self.potion = Potion(pos[0][0],pos[0][1])
         self.potion.spawn()
 
