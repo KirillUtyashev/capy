@@ -102,7 +102,7 @@ class Game:
 
         if in_cave:
             global NUM_MONSTERS
-            NUM_MONSTERS = NUM_MONSTERS * 5
+            NUM_MONSTERS = NUM_MONSTERS * 2
         monster_positions = get_random_spawn_positions(self.dungeon, NUM_MONSTERS, exclude=monster_exclude,offset_x=100,
                                                        offset_y=100)
         self.monsters = [Monster(x, y, self.theme) for (x, y) in monster_positions]
