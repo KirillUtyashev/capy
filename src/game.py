@@ -93,20 +93,15 @@ class Game:
         monster_positions = get_random_spawn_positions(self.dungeon ,2, exclude=monster_exclude,offset_x=100,
                                                        offset_y=100)
         self.monsters = [Monster(x, y) for (x, y) in monster_positions]
-        if in_cave:
-            self.questions = Queue()
-            with open("src/questions.json", "r") as f:
-                data = json.load(f)
-            self.questions.read_from_json(data)
-        else:
-            self.questions = None
+        self.questions = None
         self.topic = TOPIC
 
-    def initialize_theme(self, topic):
+    def initialize_theme(self, topic=None):
         global TOPIC
-        self.topic = topic
-        TOPIC = topic
-        self.questions = self.run_generate_with_loading(topic)
+        if not TOPIC:
+            TOPIC = topic
+        self.topic = TOPIC
+        self.questions = self.run_generate_with_loading()
 
     def run(self):
         self.base_surface.fill(BLACK)
@@ -527,14 +522,14 @@ class Game:
             time.sleep(0.1)
 
     # Main function that sets up the multiprocessing processes
-    def run_generate_with_loading(self, topic):
+    def run_generate_with_loading(self):
         stop_event = multiprocessing.Event()
         result_queue = multiprocessing.Queue()
 
         # Start the process for generating questions
         generator_process = multiprocessing.Process(
             target=run_generate_question,
-            args=(topic, NUM_MONSTERS, stop_event, result_queue)
+            args=(TOPIC, NUM_MONSTERS, stop_event, result_queue)
         )
         generator_process.start()
 

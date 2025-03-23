@@ -26,13 +26,11 @@ class Cave(Object):
 
     def interact(self, hero):
         if self.active:
-            pygame.time.delay(100)  # Optional delay for clarity
-
             from .game import Game  # avoid circular import issues
 
             cave_game = Game(in_cave=True)  # pass flag
+            cave_game.initialize_theme()
             cave_game.run()
-
             pygame.quit()
 
 
