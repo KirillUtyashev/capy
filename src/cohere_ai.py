@@ -25,14 +25,14 @@ co = cohere.Client(API_KEY)
 # ==================== QUESTION GENERATION ====================
 def generate_questions(topic, n=5):
     prompt = f"""
-        Generate {n} different multiple-choice questions about "{topic}".
+        Generate {n} different multiple-choice questions with 4 options about "{topic}".
         Format for each question:
         Question: <question>
         Correct: <correct>
         Incorrect: <incorrect_1>, <incorrect_2>, <incorrect_3>
         """
     print(prompt)
-    response = co.generate(model="command-r-plus", prompt=prompt, max_tokens=150 * n, temperature=0.7)
+    response = co.generate(model="command-r-plus", prompt=prompt, max_tokens=50 * n, temperature=0.7)
 
     questions = Queue()
     raw_questions = response.generations[0].text.strip().split("\n\n")
@@ -87,7 +87,7 @@ def explain_mistake(question, correct_answer, user_answer):
     Explanation: Explain in simple, easy-to-understand language why the correct answer is right and why the child’s answer was not correct. Avoid complex terms and provide a straightforward reasoning that a child can grasp.
     Encouragement: Include an encouraging note that reinforces that making mistakes is a normal part of learning and that trying is important.
     """
-    response = co.generate(model="command-r-plus", prompt=prompt, max_tokens=100, temperature=0.7)
+    response = co.generate(model="command-r-plus", prompt=prompt, max_tokens=50, temperature=0.7)
     return response.generations[0].text.strip()
 #
 #

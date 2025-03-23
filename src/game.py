@@ -1,9 +1,10 @@
 # src/game.py
 import time
-
+import asyncio
 import pygame
 import sys
 from .cohere_ai import generate_questions
+from .queue import Queue
 from .settings import WIDTH, HEIGHT, FPS, BLACK, WHITE
 from .settings import IMG_DIR
 from .hero import Hero
@@ -80,6 +81,7 @@ class Game:
                                                        offset_y=100)
         self.monsters = [Monster(x, y) for (x, y) in monster_positions]
         self.questions = None
+        self.topic = None
 
     def run(self):
         self.base_surface.fill(BLACK)
@@ -111,7 +113,7 @@ class Game:
             self.check_stone_collisions()
 
             # Monster collisions => quiz
-            self.check_collisions()
+            asyncio.run(self.check_collisions())
 
             # Remove dead monsters
             self.monsters = [m for m in self.monsters if m.health > 0]
@@ -218,7 +220,8 @@ class Game:
                     else:
                         topic += event.unicode
             pygame.display.update()
-        self.questions = generate_questions(topic, n=NUM_MONSTERS)
+        self.topic = topic
+        self.questions = generate_questions(self.topic, n=NUM_MONSTERS)
         self.run()
 
     def main_menu(self):
@@ -260,8 +263,9 @@ class Game:
 
             pygame.display.update()
 
-    def check_collisions(self):
+    async def check_collisions(self):
         """If hero collides with monster and it’s a new collision, show quiz."""
+        temp_questions = Queue()
         for m in self.monsters:
             if m.stun_timer > 0:
                 continue
@@ -276,6 +280,8 @@ class Game:
                         # Gotta make sure queue is not empty
                         question = self.questions.dequeue()
                         ans = show_quiz(self.base_surface, self.clock, self.font, question)
+                        if len(self.questions) == NUM_MONSTERS // 2:
+                            temp_questions = await asyncio.to_thread(generate_questions, self.topic, NUM_MONSTERS // 2)
                         if ans == question["correct"]:
                             m.health -= 1
                             self.hero.attack()
@@ -291,6 +297,8 @@ class Game:
                     m.in_collision = False
             else:
                 m.in_collision = False
+        while not temp_questions.is_empty():
+            self.questions.enqueue(temp_questions.dequeue())
 
     def draw_scaled_game(self):
         # Get the actual window size.
