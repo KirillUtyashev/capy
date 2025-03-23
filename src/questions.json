@@ -1,1 +1,1 @@
-[{"question": "What number completes the equation? 5 + __ = 12", "correct": "7", "incorrect": ["9", "3", "11"], "hint": "Think of a number line and count forward from 5."}]
+[{"question": "The number line shows numbers from 0 to 20. Which number is missing?", "correct": "11", "incorrect": ["7", "15", "19"], "hint": "Think about the pattern of numbers on the number line. The missing number is between 10 and 12."}]
