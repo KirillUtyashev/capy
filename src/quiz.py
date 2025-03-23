@@ -85,12 +85,12 @@ def show_quiz(surface, clock, font, question):
         buttons.append((ans, rect))
 
     # Load and position the assistant icon within the quiz window.
-    assistant_icon_size = 200
+    assistant_icon_size = 150
     assistant_img = pygame.image.load(f"{IMG_DIR}/assistant.png").convert_alpha()
     assistant_img = pygame.transform.scale(assistant_img, (assistant_icon_size, assistant_icon_size))
     assistant_icon_rect = pygame.Rect(
-        quiz_rect.left + 10,  # 10 pixels from the left edge
-        quiz_rect.bottom - assistant_icon_size - 10,  # 10 pixels from the bottom edge
+        quiz_rect.left + 10,
+        quiz_rect.bottom - assistant_icon_size - 10,
         assistant_icon_size,
         assistant_icon_size
     )
@@ -148,11 +148,11 @@ def show_quiz(surface, clock, font, question):
         if hint_shown:
             hint_font = pygame.font.Font("assets/PixelifySans.ttf", 20)
             # Get the current hint chunk.
-            current_hint = hint_chunks[current_hint_index]
+            current_hint = hint_chunks[current_hint_index - 1]
             hint_surf = hint_font.render(current_hint, True, WHITE)
             hint_rect = hint_surf.get_rect()
             hint_rect.bottomleft = (
-            assistant_icon_rect.left, assistant_icon_rect.top)
+            assistant_icon_rect.left - 10, assistant_icon_rect.top - 25)
             bubble_rect = hint_rect.inflate(20, 20)
             pygame.draw.rect(surface, (50, 50, 50), bubble_rect,
                              border_radius=8)
