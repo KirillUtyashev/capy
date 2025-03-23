@@ -16,22 +16,36 @@ def show_quiz(surface, clock, font, question):
     answers = incorrect_answers
     answers.append(question["correct"])
 
-    quiz_width, quiz_height = 400, 300
+    quiz_width, quiz_height = 800, 600
     quiz_x = (WIDTH - quiz_width) // 2
     quiz_y = (HEIGHT - quiz_height) // 2
     quiz_rect = pygame.Rect(quiz_x, quiz_y, quiz_width, quiz_height)
 
     question_surf = font.render(question_, True, WHITE)
-    question_rect = question_surf.get_rect(center=(quiz_rect.centerx, quiz_rect.top + 40))
+    question_rect = question_surf.get_rect(center=(quiz_rect.centerx, quiz_rect.top + 50))
+
 
     # Create 4 buttons in a 2x2 grid
-    button_width, button_height = 100, 40
+    button_width, button_height = 300, 80
+    spacing = 20  # space between buttons
+
+    # Calculate the total grid size for 2 columns and 2 rows.
+    grid_width = 2 * button_width + spacing
+    grid_height = 2 * button_height + spacing
+
+    # To center the grid horizontally, calculate grid_x:
+    grid_x = quiz_rect.left + (quiz_width - grid_width) // 2
+    # For vertical positioning, place the grid below the question.
+    # For example, compute grid_y so that the grid is centered in the lower half.
+    grid_y = question_rect.bottom + ((quiz_rect.bottom - question_rect.bottom) - grid_height) // 2
+
+    # Create 4 buttons in a 2x2 grid.
     buttons = []
     for i, ans in enumerate(answers):
         row = i // 2
         col = i % 2
-        btn_x = quiz_rect.left + 50 + col * (button_width + 20)
-        btn_y = quiz_rect.top + 100 + row * (button_height + 20)
+        btn_x = grid_x + col * (button_width + spacing)
+        btn_y = grid_y + row * (button_height + spacing)
         rect = pygame.Rect(btn_x, btn_y, button_width, button_height)
         buttons.append((ans, rect))
 

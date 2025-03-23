@@ -1,9 +1,13 @@
 import cohere
 import json
 from .queue import Queue
+import os
+from dotenv import load_dotenv
 
 # ==================== CONFIGURATION ====================
-API_KEY = "V1WlqVxN5PtUEXsNbA5LgOliHoS6SysKT9a8wiO3"  # Replace with your Cohere API Key
+  # Replace with your Cohere API Key
+load_dotenv()
+API_KEY = os.getenv("API_KEY")
 TOPIC = "elementary math"
 QUESTIONS_FILE = "questions.json"
 
