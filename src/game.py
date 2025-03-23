@@ -113,7 +113,7 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.VIDEORESIZE:
                     self.screen = pygame.display.set_mode((event.w, event.h),
-                                                     pygame.RESIZABLE)
+                                                          pygame.RESIZABLE)
                     new_width, new_height = event.w, event.h
 
                 if event.type == pygame.QUIT:
@@ -125,7 +125,7 @@ class Game:
                         # End the game
                         running = False
 
-        # === Update logic ===
+            # === Update logic ===
             keys = pygame.key.get_pressed()
             stone_rects = [stone.rect for stone in self.stones]
             self.hero.update(keys, stone_rects)
@@ -370,15 +370,15 @@ class Game:
         self.base_surface.blit(exit_label, label_rect)
 
         draw_health_bar(
-                    surface=self.base_surface,
-                    x=10,
-                    y=30,
-                    current_health=self.hero.health,
-                    max_health=10,  # or whatever your hero's max health is
-                    bar_width=150,
-                    bar_height=15,
-                    color=(0, 255, 0)  # green for hero
-                )
+            surface=self.base_surface,
+            x=10,
+            y=30,
+            current_health=self.hero.health,
+            max_health=10,  # or whatever your hero's max health is
+            bar_width=150,
+            bar_height=15,
+            color=(0, 255, 0)  # green for hero
+        )
 
         # Label "Hero" above the bar
         # hero_label = self.font.render("Hero", True, (255, 255, 255))
@@ -392,7 +392,7 @@ class Game:
         spacing = 10
 
         for i, monster in enumerate(self.monsters):
-    # Calculate each monster bar’s x-position in a row
+            # Calculate each monster bar’s x-position in a row
             bar_x = bar_x_start + i * (bar_width + spacing)
 
             # Draw the monster bar horizontally
@@ -409,12 +409,11 @@ class Game:
 
             # Label "Monster i" just above each bar
             label = self.font.render(f"Monster {i+1}", True, (255, 255, 255))
-            self.base_surface.blit(label, (bar_x, bar_y - 18))\
-
+            self.base_surface.blit(label, (bar_x, bar_y - 18))
 
     def spawn_cave(self):
-    # 1) Pick a random valid position for the cave
-    #    (i.e., on island cells, excluding stone positions, etc.)
+        # 1) Pick a random valid position for the cave
+        #    (i.e., on island cells, excluding stone positions, etc.)
         cave_positions = get_random_spawn_positions(
             self.dungeon,           # the Dungeon instance
             count=1,                # just 1 random spot for the cave
