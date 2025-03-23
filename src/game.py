@@ -281,7 +281,7 @@ class Game:
                         question = self.questions.dequeue()
                         ans = show_quiz(self.base_surface, self.clock, self.font, question)
                         if len(self.questions) == NUM_MONSTERS // 2:
-                            temp_questions = await asyncio.to_thread(generate_questions, self.topic, NUM_MONSTERS // 2)
+                            temp_questions = await asyncio.to_thread(generate_questions, self.topic, 1)
                         if ans == question["correct"]:
                             m.health -= 1
                             self.hero.attack()
