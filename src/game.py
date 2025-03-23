@@ -6,7 +6,7 @@ import asyncio
 import pygame
 import sys
 import multiprocessing
-from .cohere_ai import generate_questions
+from .cohere_ai import explain_mistake, generate_questions
 from .queue import Queue
 from multiprocessing.connection import Connection
 from .settings import WIDTH, HEIGHT, FPS, BLACK, WHITE
@@ -60,6 +60,12 @@ class Game:
         self.theme=random.choice([["dungeon",f"{IMG_DIR}/dungeon_tile.png",f"{IMG_DIR}/monster.png", f"{IMG_DIR}/stone.png"], ["sea",f"{IMG_DIR}/bubbles.png",f"{IMG_DIR}/blue_mon.png", f"{IMG_DIR}/bubbl.png"], ["grass", f"{IMG_DIR}/grass.png", f"{IMG_DIR}/tree_mon.png", f"{IMG_DIR}/tre.png"]])
         self.in_cave = in_cave
         pygame.init()
+        if in_cave:
+            pygame.mixer.music.load("assets/music/run-faster-abbynoise-main-version-36307-02-27.mp3")
+            pygame.mixer.music.play(-1)
+        else:
+            pygame.mixer.music.load("assets/music/open-fields-aaron-paul-low-main-version-25198-02-16.mp3")
+            pygame.mixer.music.play(-1)
         print("In the game")
         self.dungeon = Dungeon()
         self.island_map = self.dungeon.get_island_only()
@@ -93,7 +99,11 @@ class Game:
         self.assistant = Assistant(self.hero)
         self.camera = Camera(WIDTH, HEIGHT, self.world_width, self.world_height)
         monster_exclude = self.stone_positions
-        monster_positions = get_random_spawn_positions(self.dungeon ,2, exclude=monster_exclude,offset_x=100,
+
+        if in_cave:
+            global NUM_MONSTERS
+            NUM_MONSTERS = NUM_MONSTERS * 5
+        monster_positions = get_random_spawn_positions(self.dungeon, NUM_MONSTERS, exclude=monster_exclude,offset_x=100,
                                                        offset_y=100)
         self.monsters = [Monster(x, y, self.theme) for (x, y) in monster_positions]
         if in_cave:

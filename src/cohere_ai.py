@@ -28,13 +28,19 @@ co = cohere.Client(API_KEY)
 # ==================== QUESTION GENERATION ====================
 def generate_questions(topic, n=5):
     prompt = f"""
-        You are helpful assistant for an application that integrates learning through interactive games.
-        Generate {n} different multiple-choice questions with 4 options about "{topic}". Be creative with your questions - explore various perspectives on the topic. 
-        Format for each question:
-        Question: <question>
-        Correct: <correct>
-        Incorrect: <incorrect_1>, <incorrect_2>, <incorrect_3>
-        Hint: <hint>
+        You are an assistant for an interactive learning games application. Your task is to generate {n} unique multiple-choice questions on the topic "{topic}". The questions should be creative and explore various perspectives of the topic to engage the learner.
+        For each question, please adhere strictly to the following format:
+        
+        Question: <question text>
+        Correct: <correct answer>
+        Incorrect: <incorrect answer 1>, <incorrect answer 2>, <incorrect answer 3>
+        Hint: <hint text>
+        Requirements:
+        
+        All questions must be distinct.
+        Each question should have one correct answer and exactly three incorrect answers.
+        Ensure the hint is helpful and relevant to the question.
+        Explore diverse angles of the topic to encourage critical thinking and deeper learning.
         """
     print(prompt)
     response = co.generate(model="command-r-plus", prompt=prompt, max_tokens=100 * n, temperature=0.7)
@@ -86,12 +92,19 @@ def generate_similar_question(similar_to):
 
 def explain_mistake(question, correct_answer, user_answer):
     prompt = f"""
-    A child answered a multiple-choice question incorrectly.
+    You are providing a supportive explanation to a child who answered a multiple-choice question incorrectly. Use the following information:
+
     Question: {question}
-    User's incorrect answer: {user_answer}
-    Correct answer: {correct_answer}
-    Explanation: Explain in simple, easy-to-understand language why the correct answer is right and why the child’s answer was not correct. Avoid complex terms and provide a straightforward reasoning that a child can grasp.
-    Encouragement: Include an encouraging note that reinforces that making mistakes is a normal part of learning and that trying is important.
+    Child's Answer: {user_answer}
+    Correct Answer: {correct_answer}
+    
+    Please follow these instructions:
+    
+    Explanation: In plain and simple language, explain why the correct answer is right and why the child's answer was not correct. Use straightforward reasoning that a child can easily understand. Avoid complex terms.
+    Encouragement: Include a friendly, encouraging note emphasizing that making mistakes is a normal part of learning and that trying is important.
+    Output Constraint: Do not include any additional text or commentary—only the explanation with encouragement.
+    Your entire response must consist solely of the explanation and encouragement.
+
     """
     response = co.generate(model="command-r-plus", prompt=prompt, max_tokens=50, temperature=0.7)
     return response.generations[0].text.strip()
