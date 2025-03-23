@@ -1,3 +1,6 @@
+# src/quiz.py
+import textwrap
+
 import pygame
 import sys
 import random
@@ -44,7 +47,6 @@ def show_quiz(surface, clock, font, question):
     answers = incorrect_answers + [question["correct"]]       # add the correct answer
     random.shuffle(answers)                   # shuffle all answers
 
-    # Define the quiz window.
     quiz_width, quiz_height = 800, 600
     quiz_x = (WIDTH - quiz_width) // 2
     quiz_y = (HEIGHT - quiz_height) // 2
@@ -95,7 +97,9 @@ def show_quiz(surface, clock, font, question):
 
     # Get hint text if available.
     hint_text = question.get("hint", "Need a hint? Click me!")
-    hint_shown = False
+    hint_chunks = textwrap.wrap(hint_text, 60)
+    current_hint_index = 0
+    hint_shown = False  # Toggle for showing the hint bubble
 
     quiz_running = True
 
@@ -108,7 +112,10 @@ def show_quiz(surface, clock, font, question):
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
                 if assistant_icon_rect.collidepoint(mouse_pos):
-                    hint_shown = not hint_shown
+                    hint_shown = True
+                    current_hint_index = (current_hint_index + 1) % len(
+                        hint_chunks)
+
                 for ans, rect in buttons:
                     if rect.collidepoint(mouse_pos):
                         return ans
@@ -139,15 +146,20 @@ def show_quiz(surface, clock, font, question):
         # Draw the assistant icon.
         surface.blit(assistant_img, assistant_icon_rect)
         if hint_shown:
-            hint_font = pygame.font.SysFont(None, 20)
-            hint_surf = hint_font.render(hint_text, True, WHITE)
-            hint_rect = hint_surf.get_rect(midbottom=(assistant_icon_rect.centerx, assistant_icon_rect.top - 10))
+            hint_font = pygame.font.Font("assets/PixelifySans.ttf", 20)
+            # Get the current hint chunk.
+            current_hint = hint_chunks[current_hint_index]
+            hint_surf = hint_font.render(current_hint, True, WHITE)
+            hint_rect = hint_surf.get_rect()
+            hint_rect.bottomleft = (
+            assistant_icon_rect.left, assistant_icon_rect.top)
             bubble_rect = hint_rect.inflate(20, 20)
-            pygame.draw.rect(surface, (50, 50, 50), bubble_rect, border_radius=8)
+            pygame.draw.rect(surface, (50, 50, 50), bubble_rect,
+                             border_radius=8)
             pygame.draw.rect(surface, WHITE, bubble_rect, 2, border_radius=8)
             surface.blit(hint_surf, hint_rect)
 
-        # Draw the answer buttons.
+        # Draw answer buttons
         for ans, rect in buttons:
             pygame.draw.rect(surface, (100, 100, 100), rect)
             pygame.draw.rect(surface, WHITE, rect, 2)
@@ -155,7 +167,6 @@ def show_quiz(surface, clock, font, question):
             ans_rect = ans_surf.get_rect(center=rect.center)
             surface.blit(ans_surf, ans_rect)
 
-        # Scale the surface if needed and update the display.
         scaled_surface = pygame.transform.scale(surface, (WIDTH, HEIGHT))
         pygame.display.get_surface().blit(scaled_surface, (0, 0))
         pygame.display.flip()
