@@ -285,7 +285,6 @@ class Game:
                             self.hero.health -= 1
                             self.hero.take_damage()
 
-
                         m.stun_timer = STUN_1_TIME
                         # reposition_hero(self.hero, m, distance=100)
                 else:
@@ -392,7 +391,7 @@ class Game:
         self.cave.spawn()
 
     def spawn_potion(self):
-        pos=get_random_spawn_positions(self.dungeon, 1, exclude=self.stone_positions)
+        pos=get_random_spawn_positions(self.dungeon,1, exclude=self.stone_positions)
         self.potion = Potion(pos[0][0],pos[0][1])
         self.potion.spawn()
 
