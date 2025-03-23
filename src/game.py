@@ -60,12 +60,15 @@ class Game:
         self.theme=random.choice([["dungeon",f"{IMG_DIR}/dungeon_tile.png",f"{IMG_DIR}/monster.png", f"{IMG_DIR}/stone.png"], ["sea",f"{IMG_DIR}/bubbles.png",f"{IMG_DIR}/blue_mon.png", f"{IMG_DIR}/bubbl.png"], ["grass", f"{IMG_DIR}/grass.png", f"{IMG_DIR}/tree_mon.png", f"{IMG_DIR}/tre.png"]])
         self.in_cave = in_cave
         pygame.init()
-        if in_cave:
-            pygame.mixer.music.load("assets/music/run-faster-abbynoise-main-version-36307-02-27.mp3")
-            pygame.mixer.music.play(-1)
-        else:
-            pygame.mixer.music.load("assets/music/open-fields-aaron-paul-low-main-version-25198-02-16.mp3")
-            pygame.mixer.music.play(-1)
+        try:
+            if in_cave:
+                pygame.mixer.music.load("assets/music/run-faster-abbynoise-main-version-36307-02-27.mp3")
+                pygame.mixer.music.play(-1)
+            else:
+                pygame.mixer.music.load("assets/music/open-fields-aaron-paul-low-main-version-25198-02-16.mp3")
+                pygame.mixer.music.play(-1)
+        except Exception as e:
+            print("Audio error:", e)
         print("In the game")
         self.dungeon = Dungeon()
         self.island_map = self.dungeon.get_island_only()

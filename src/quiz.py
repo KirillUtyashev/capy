@@ -166,6 +166,7 @@ def show_quiz(surface, clock, font, question):
                     if explanation_index >= len(explanation_chunks):
                         # End explanation mode and return the wrong answer.
                         return selected_answer
+                    continue
                 if assistant_icon_rect.collidepoint(mouse_pos):
                     hint_shown = True
                     current_hint_index = (current_hint_index + 1) % len(

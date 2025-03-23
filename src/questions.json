@@ -1,1 +1,1 @@
-[{"question": "What number completes the equation? 5 + __ = 12", "correct": "7", "incorrect": ["9", "3", "11"], "hint": "Think of a number line and count forward from 5."}]
+[{"question": "A farmer has 26 sheep and 10 goats. How many animals in total, including the birds, should the farmer buy to reach a count of 100, if each animal costs $10 and he has $550 to spend?", "correct": "44", "incorrect": ["36", "50", "65"], "hint": "The farmer has enough money to buy 55 animals in total as each animal costs $10,"}]
