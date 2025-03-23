@@ -1,11 +1,14 @@
 # src/game.py
+import itertools
 import json
 import time
 import asyncio
 import pygame
 import sys
+import multiprocessing
 from .cohere_ai import generate_questions
 from .queue import Queue
+from multiprocessing.connection import Connection
 from .settings import WIDTH, HEIGHT, FPS, BLACK, WHITE
 from .settings import IMG_DIR
 from .hero import Hero
@@ -19,7 +22,6 @@ import random
 from .settings import (TILE_SIZE, GRID_WIDTH, GRID_HEIGHT, GRID_ORIGIN_X,
                        GRID_ORIGIN_Y, MONSTER_SPEED, STUN_1_TIME, NUM_MONSTERS)
 from .camera import Camera
-
 
 
 def draw_health_bar(surface, x, y, current_health, max_health, bar_width=100, bar_height=10, color=(0, 255, 0)):
@@ -44,6 +46,12 @@ def draw_health_bar(surface, x, y, current_health, max_health, bar_width=100, ba
 
 
 TOPIC = None
+
+
+def run_generate_question(topic, num, stop_event, result_queue):
+    result = generate_questions(topic, n=num)
+    result_queue.put(result)
+    stop_event.set()  # Signal that question generation is complete
 
 
 class Game:
@@ -94,11 +102,11 @@ class Game:
             self.questions = None
         self.topic = TOPIC
 
-    def initialize_theme(self, topic, questions):
+    def initialize_theme(self, topic):
         global TOPIC
         self.topic = topic
         TOPIC = topic
-        self.questions = questions
+        self.questions = self.run_generate_with_loading(topic)
 
     def run(self):
         self.base_surface.fill(BLACK)
@@ -192,6 +200,7 @@ class Game:
         input_active = True
 
         while input_active:
+            self.clock.tick(FPS)
             self.screen.blit(background, (0, 0))
 
             # Header Text
@@ -222,7 +231,7 @@ class Game:
                     else:
                         topic += event.unicode
             pygame.display.update()
-        self.initialize_theme(topic, generate_questions(topic, n=NUM_MONSTERS))
+        self.initialize_theme(topic)
         self.run()
 
     def main_menu(self):
@@ -231,6 +240,7 @@ class Game:
         screen_width, screen_height = self.screen.get_size()  # Get dynamic screen size
 
         while True:
+            self.clock.tick(FPS)
             self.screen.blit(background, (0, 0))
 
             MENU_MOUSE_POS = pygame.mouse.get_pos()
@@ -332,7 +342,6 @@ class Game:
         # Optionally clear the screen to a background color (BLACK in this case).
         self.screen.fill(BLACK)
         self.screen.blit(scaled_surface, (x_offset, y_offset))
-
 
     def draw_hud(self):
         """
@@ -440,7 +449,6 @@ class Game:
     #     self.screen.blit(self.shadow_surface, (0, 0))
     def spawn_border_stones(self):
         self.stones = []
-
         rows = len(self.island_map)
         cols = len(self.island_map[0])
 
@@ -494,3 +502,48 @@ class Game:
                 self.hero.update_position_from_rect()
 
                 break
+
+    # Function that displays a loading screen until stop_event is set
+    def loading_screen(self, stop_event):
+        spinner = itertools.cycle(["|", "/", "-", "\\"])
+        background = pygame.image.load("assets/images/background.png")
+
+        # Continue looping until stop_event is set
+        while not stop_event.is_set():
+            self.clock.tick(FPS)
+            # Draw background
+            self.screen.blit(background, (0, 0))
+
+            # Build the loading message with spinner animation
+            loading_text = "Loading " + next(spinner)
+            # Render the loading text; adjust the size and color as needed
+            text_surf = self.get_font(50).render(loading_text, True, (255, 255, 255))
+            text_rect = text_surf.get_rect(center=(self.screen.get_width() // 2,
+                                                   self.screen.get_height() // 2))
+            self.screen.blit(text_surf, text_rect)
+
+            # Update the display so that the text is visible
+            pygame.display.flip()
+            time.sleep(0.1)
+
+    # Main function that sets up the multiprocessing processes
+    def run_generate_with_loading(self, topic):
+        stop_event = multiprocessing.Event()
+        result_queue = multiprocessing.Queue()
+
+        # Start the process for generating questions
+        generator_process = multiprocessing.Process(
+            target=run_generate_question,
+            args=(topic, NUM_MONSTERS, stop_event, result_queue)
+        )
+        generator_process.start()
+
+        # Show the loading screen in the main process while the generator runs
+        self.loading_screen(stop_event)
+
+        # Wait for the generator process to finish
+        generator_process.join()
+
+        # Retrieve and return the result from the queue
+        result = result_queue.get()
+        return result
