@@ -1,6 +1,6 @@
 # src/quiz.py
 import textwrap
-
+from .cohere_ai import explain_mistake
 import pygame
 import sys
 import random
@@ -145,6 +145,11 @@ def show_quiz(surface, clock, font, question):
     current_hint_index = 0
     hint_shown = False  # Toggle for showing the hint bubble
 
+    explanation_mode = False
+    explanation_chunks = []
+    explanation_index = 0
+    selected_answer = None
+
     quiz_running = True
 
     while quiz_running:
@@ -155,6 +160,12 @@ def show_quiz(surface, clock, font, question):
                 sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
+                if explanation_mode:
+                    hint_shown = True
+                    explanation_index += 1
+                    if explanation_index >= len(explanation_chunks):
+                        # End explanation mode and return the wrong answer.
+                        return selected_answer
                 if assistant_icon_rect.collidepoint(mouse_pos):
                     hint_shown = True
                     current_hint_index = (current_hint_index + 1) % len(
@@ -162,7 +173,16 @@ def show_quiz(surface, clock, font, question):
 
                 for ans, rect in buttons:
                     if rect.collidepoint(mouse_pos):
-                        return ans
+                        if ans != question["correct"]:
+                            question_explanation = explain_mistake(
+                                question_text, [question["correct"]], ans)
+                            print(question_explanation)
+                            explanation_chunks = textwrap.wrap(
+                                question_explanation, 60)
+                            explanation_index = 0
+                            explanation_mode = True
+                        else:
+                            return ans
 
         # Dim the background.
         surface.fill(BLACK)
@@ -189,7 +209,7 @@ def show_quiz(surface, clock, font, question):
 
         # Draw the assistant icon.
         surface.blit(assistant_img, assistant_icon_rect)
-        if hint_shown:
+        if hint_shown and not explanation_mode:
             hint_font = pygame.font.Font("assets/PixelifySans.ttf", 20)
             # Get the current hint chunk.
             current_hint = hint_chunks[current_hint_index - 1]
@@ -204,32 +224,49 @@ def show_quiz(surface, clock, font, question):
             surface.blit(hint_surf, hint_rect)
 
         # Draw answer buttons
-        for ans, rect in buttons:
-            pygame.draw.rect(surface, (100, 100, 100), rect)
-            pygame.draw.rect(surface, WHITE, rect, 2)
+        if not explanation_mode:
+            for ans, rect in buttons:
+                pygame.draw.rect(surface, (100, 100, 100), rect)
+                pygame.draw.rect(surface, WHITE, rect, 2)
 
-            # Wrap and scale text to fit within the button
-            text_surfaces, line_height = wrap_and_scale_text(
-                ans,
-                "assets/font.ttf",  # your font file
-                rect.width - 20,
-                rect.height - 20,
-                28,  # starting font size
-                WHITE
-            )
+                # Wrap and scale text to fit within the button
+                text_surfaces, line_height = wrap_and_scale_text(
+                    ans,
+                    "assets/font.ttf",  # your font file
+                    rect.width - 20,
+                    rect.height - 20,
+                    28,  # starting font size
+                    WHITE
+                )
 
-            # Calculate top Y to center vertically
-            total_text_height = len(text_surfaces) * line_height
-            start_y = rect.top + (rect.height - total_text_height) // 2
+                # Calculate top Y to center vertically
+                total_text_height = len(text_surfaces) * line_height
+                start_y = rect.top + (rect.height - total_text_height) // 2
 
-            for i, (surf, _) in enumerate(text_surfaces):
-                rect_line = surf.get_rect(centerx=rect.centerx, y=start_y + i * line_height)
-                surface.blit(surf, rect_line)
+                for i, (surf, _) in enumerate(text_surfaces):
+                    rect_line = surf.get_rect(centerx=rect.centerx, y=start_y + i * line_height)
+                    surface.blit(surf, rect_line)
+
+        if explanation_mode:
+            box_width, box_height = 600, 200
+            box_x = (WIDTH - box_width) // 2
+            box_y = (HEIGHT - box_height) // 2
+            explanation_box = pygame.Rect(box_x, box_y, box_width, box_height)
+            pygame.draw.rect(surface, WHITE, explanation_box, 2)
+            # Display the current explanation chunk.
+            if explanation_index < len(explanation_chunks):
+                chunk_text = explanation_chunks[explanation_index]
+            else:
+                chunk_text = ""
+            text_surface = font.render(chunk_text, True, WHITE)
+            text_rect = text_surface.get_rect(center=explanation_box.center)
+            surface.blit(text_surface, text_rect)
+            # Display a "Click to continue" message below the box.
+            continue_msg = font.render("Click to continue", True, WHITE)
+            continue_rect = continue_msg.get_rect(
+                center=(WIDTH // 2, box_y + box_height + 20))
+            surface.blit(continue_msg, continue_rect)
 
         scaled_surface = pygame.transform.scale(surface, (WIDTH, HEIGHT))
         pygame.display.get_surface().blit(scaled_surface, (0, 0))
         pygame.display.flip()
-
-
-def show_explanation(explanation):
-    pass
