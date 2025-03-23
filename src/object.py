@@ -1,6 +1,7 @@
 import pygame
 from .settings import IMG_DIR
 
+
 class Object:
     def __init__(self, name):
         self.name = name
@@ -28,6 +29,7 @@ class Cave(Object):
             pygame.time.delay(100)  # Optional delay for clarity
 
             from .game import Game  # avoid circular import issues
+
             cave_game = Game(in_cave=True)  # pass flag
             cave_game.run()
 

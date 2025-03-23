@@ -1,4 +1,5 @@
 # src/game.py
+import json
 import time
 import asyncio
 import pygame
@@ -20,6 +21,7 @@ from .settings import (TILE_SIZE, GRID_WIDTH, GRID_HEIGHT, GRID_ORIGIN_X,
 from .camera import Camera
 
 
+
 def draw_health_bar(surface, x, y, current_health, max_health, bar_width=100, bar_height=10, color=(0, 255, 0)):
     """
     Draws a health bar on 'surface' with top-left at (x, y).
@@ -39,6 +41,9 @@ def draw_health_bar(surface, x, y, current_health, max_health, bar_width=100, ba
     # Draw the filled part
     inner_rect = pygame.Rect(x, y, fill_width, bar_height)
     pygame.draw.rect(surface, color, inner_rect)
+
+
+TOPIC = None
 
 
 class Game:
@@ -80,8 +85,20 @@ class Game:
         monster_positions = get_random_spawn_positions(self.dungeon ,2, exclude=monster_exclude,offset_x=100,
                                                        offset_y=100)
         self.monsters = [Monster(x, y) for (x, y) in monster_positions]
-        self.questions = None
-        self.topic = None
+        if in_cave:
+            self.questions = Queue()
+            with open("src/questions.json", "r") as f:
+                data = json.load(f)
+            self.questions.read_from_json(data)
+        else:
+            self.questions = None
+        self.topic = TOPIC
+
+    def initialize_theme(self, topic, questions):
+        global TOPIC
+        self.topic = topic
+        TOPIC = topic
+        self.questions = questions
 
     def run(self):
         self.base_surface.fill(BLACK)
@@ -166,21 +183,6 @@ class Game:
         self.main_menu()
         # sys.exit()
 
-    # def check_collisions(self):
-    #     """If hero collides with monster and it’s a new collision, show quiz."""
-    #     for m in self.monsters:
-    #         if self.hero.rect.colliderect(m.rect):
-    #             if not m.in_collision:
-    #                 m.in_collision = True
-    #                 result = show_quiz(self.screen, self.clock, self.font)
-    #                 if result:
-    #                     m.health -= 1
-    #                 else:
-    #                     self.hero.health -= 1
-    #                 reposition_hero(self.hero, m, distance=100)
-    #         else:
-    #             m.in_collision = False
-
     def get_font(self, size): # Returns Press-Start-2P in the desired size
         return pygame.font.Font("assets/font.ttf", size)
 
@@ -220,8 +222,7 @@ class Game:
                     else:
                         topic += event.unicode
             pygame.display.update()
-        self.topic = topic
-        self.questions = generate_questions(self.topic, n=NUM_MONSTERS)
+        self.initialize_theme(topic, generate_questions(topic, n=NUM_MONSTERS))
         self.run()
 
     def main_menu(self):
