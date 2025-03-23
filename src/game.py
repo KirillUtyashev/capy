@@ -175,7 +175,6 @@ class Game:
 
             # self.hero.draw(self.base_surface)
             # # self.draw_shadow()
-            self.assistant.draw(self.base_surface, self.camera)
 
             self.base_surface.blit(self.hero.image,
                                    self.camera.apply(self.hero))
@@ -189,6 +188,7 @@ class Game:
             if self.cave and self.cave.active:
                 self.base_surface.blit(self.cave.image,
                                        self.camera.apply(self.cave))
+            self.assistant.draw(self.base_surface, self.camera)
             self.draw_hud()
             # HUD
             health_text = self.font.render(f"Hero HP: {self.hero.health}", True, WHITE)
